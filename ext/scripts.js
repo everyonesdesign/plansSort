@@ -31,14 +31,12 @@ $plans.each(function() {
 
 $planWrappers = $(".plan-wrapper");
 $planWrappers.wrapAll("<div class='all-plans-wrapper' id='sortablePlans'></div>");
+
 $sortableContainer = $("#sortablePlans");
 $sortableContainer.sortable({
-  stop: function(e, ui) {
-    var $item = ui.item,
-          orderArray = [];
-    $(".plan-wrapper").each(function() {
-          orderArray.push($(this).children(".plan").attr("plan_id"));
-    });
+  stop: function() {
+    var orderArray = [];
+    writeDataToStorage();
     localStorage["plansOrder"] = JSON.stringify(orderArray);
   }
 });
@@ -52,6 +50,10 @@ if (localStorage["plansOrder"]) {
   }
 }
 
-$(".plan-wrapper").each(function() {
-      orderArray.push($(this).children(".plan").attr("plan_id"));
-});
+writeDataToStorage();
+function writeDataToStorage() {
+  $(".plan-wrapper").each(function() {
+        orderArray.push($(this).children(".plan").attr("plan_id"));
+  });
+}
+

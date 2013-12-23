@@ -4,12 +4,6 @@
   "name": "planSort",
   "description": "Allows to sort plans on megagroup staff site",
   "version": "1.1",
-  "permissions": [
-    "tabs", "notifications","management"
-  ],
-  "web_accessible_resources": [
-    "icon128.png"
-  ],
   "icons": { 
     "16": "icon16.png",
     "48": "icon48.png",
@@ -21,6 +15,5 @@
         "js": ["scripts.js"],
         "run_at": "document_end"
       }
-    ],
-  "background": "background.html"
+    ]
 }

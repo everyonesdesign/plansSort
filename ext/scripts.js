@@ -22,7 +22,7 @@ u[o]&&(delete u[o],c?delete n[l]:typeof n.removeAttribute!==i?n.removeAttribute(
 var $plans = $(".plan.todo"),
       $planWrappers,
       $sortableContainer,
-      opacityToSet = .2;
+      opacityToSet = .4;
 
 $plans.each(function() {
   $(this).prev().remove(); //remove "<br> element"
@@ -31,15 +31,12 @@ $plans.each(function() {
 }); 
 
 $planWrappers = $(".plan-wrapper"); 
-$planWrappers
-    .click(function(e) {
-      if (e.which == 2) { //hide on middle mouse button click
+$planWrappers.dblclick(function(e) {
         if ($(this).css("opacity") == 1) $(this).css("opacity", opacityToSet);
         else $(this).css("opacity", 1);
         writeDataToStorage();
-      }
-    })
-    .wrapAll("<div class='all-plans-wrapper' id='sortablePlans'></div>");
+  })
+  .wrapAll("<div class='all-plans-wrapper' id='sortablePlans'></div>");
 
 $sortableContainer = $("#sortablePlans");
 $sortableContainer.sortable({

@@ -17,7 +17,9 @@ u[o]&&(delete u[o],c?delete n[l]:typeof n.removeAttribute!==i?n.removeAttribute(
 
 
 
+(function() {
 
+if (!$("#content").length) return;
 
 var $plans = $(".plan.todo"),
       $planWrappers,
@@ -72,3 +74,4 @@ function writeDataToStorage() { //function which saves current position to the s
   localStorage["plansOpacity"] = JSON.stringify(opacityArray);
 }
 
+});

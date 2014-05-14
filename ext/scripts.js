@@ -26,11 +26,7 @@ var $plans = $(".plan.todo"),
       $sortableContainer,
       opacityToSet = .4;
 
-$plans.each(function() {
-  $(this).prev().remove(); //remove "<br> element"
-  var $toWrap = $(this).add($(this).prev());
-  $toWrap.wrapAll("<div class='plan-wrapper'></div>") //wrap it along with prev <a> element
-}); 
+$plans.wrap("<div class='plan-wrapper'></div>");
 
 $planWrappers = $(".plan-wrapper"); 
 $planWrappers.dblclick(function(e) {

@@ -1,3 +1,13 @@
+.ui-sortable-placeholder {
+    margin-top: 20px;
+    background: #aaa;
+    visibility: visible !important;
+}
+
+div.plan {
+    margin-bottom: 0 !important;
+}
+
 .plan-icons {
     position: absolute;
     top: 10px;
@@ -27,5 +37,39 @@
 .plan-changeOpacity {
     cursor: pointer;
     background: no-repeat url("icons.png");
+}
+
+.plansGroupWrapper {
+    padding-bottom: 40px;
+}
+
+.plansGroupWrapper.folded [plan_id] {
+    display: none;
+}
+
+.plansGroupWrapper-info {
+    padding: 12px;
+    background: rgba(255,255,255,.5);
+    border: rgba(0,0,0,.5);
+    border-radius: 3px;
+}
+
+.plansGroupWrapper-info span {
+    display: inline-block;
+    margin-right: 30px;
+}
+
+.plansGroupWrapper-info .domainName {
+    font-weight: bold;
+    min-width: 100px;
+}
+
+.plansGroupToggle {
+    margin-left: 40px;
+}
+
+.plansGroupMode {
+    text-align: right;
+    padding: 10px 20px;
 }
 

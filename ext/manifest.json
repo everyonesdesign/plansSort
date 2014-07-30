@@ -11,9 +11,13 @@
   },
   "content_scripts": [
       {
-        "matches": ["http://staff.oml.ru/staff/client/plan.my.php"],
+        "matches": [
+            "http://staff.oml.ru/staff/client/plan.my.php",
+            "http://staff.oml.ru/staff/client/plan.my.php/"
+        ],
         "js": ["scripts.js"],
-        "run_at": "document_end"
+        "run_at": "document_end",
+        "css": ["styles.css"]
       }
     ]
 }

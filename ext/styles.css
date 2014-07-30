@@ -1,0 +1,31 @@
+.plan-icons {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.plan-icon {
+    float: left;
+    margin-left: 6px;
+    width: 32px;
+    height: 32px;
+    top: 10px;
+    right: 10px;
+    opacity: .5;
+    transition-duration: .2s;
+}
+
+.plan-icon:hover {
+    opacity: 1;
+}
+
+.plan-moveHandle {
+    cursor: move;
+    background: no-repeat -32px 0 url("icons.png");
+}
+
+.plan-changeOpacity {
+    cursor: pointer;
+    background: no-repeat url("icons.png");
+}
+

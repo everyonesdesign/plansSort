@@ -8,14 +8,25 @@
         $sortableContainer,
         opacityToSet = .4;
 
-    $plans.dblclick(function (e) {
-        if ($(this).css("opacity") == 1) $(this).css("opacity", opacityToSet);
-        else $(this).css("opacity", 1);
+    $plans
+        .append("<div class='plan-icons'>" +
+            "<div class='plan-icon plan-changeOpacity'></div>" +
+            "<div class='plan-icon plan-moveHandle'></div>" +
+        "</div>")
+        .wrapAll("<div id='sortablePlans'></div>");
+
+    $(".plan-changeOpacity").on("click", function() {
+        var $plan = $(this).closest("[plan_id]");
+        if ($plan.css("opacity") == 1) $plan.css("opacity", opacityToSet);
+        else $plan.css("opacity", 1);
         writeAllToStorage();
-    }).wrapAll("<div id='sortablePlans'></div>");
+    });
 
     $sortableContainer = $("#sortablePlans");
     $sortableContainer.sortable({
+        axis: "y",
+        tolerance: "pointer",
+        handle: ".plan-moveHandle",
         stop: writeAllToStorage //on sortable complete renew data in storage
     });
 

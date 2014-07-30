@@ -15,7 +15,11 @@
             "http://staff.oml.ru/staff/client/plan.my.php",
             "http://staff.oml.ru/staff/client/plan.my.php/"
         ],
-        "js": ["scripts.js"],
+        "js": [
+            "jquery.min.js",
+            "jquery-ui.min.js",
+            "app.min.js"
+        ],
         "run_at": "document_end",
         "css": ["styles.css"]
       }

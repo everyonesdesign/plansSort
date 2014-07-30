@@ -24,6 +24,7 @@
 
     $.fn.customSortable = function () {
         $(this).sortable({
+            items: "[plan_id]",
             axis: "y",
             tolerance: "pointer",
             handle: ".plan-moveHandle",
@@ -32,11 +33,11 @@
     };
 
     $(".plansGeneralWrapper").before("<div class='plansGroupMode'>" +
-        "<label><input id='plansSortToggle' type='checkbox'" + (groupPlans==1 ? " checked" : "") + "> группировать по сайтам</label>" +
+        "<label><input id='plansSortToggle' type='checkbox'" + (groupPlans ? " checked" : "") + "> группировать по сайтам</label>" +
     "</div>");
 
     $("#plansSortToggle").change(function() {
-        if (groupPlans==1) {
+        if (groupPlans) {
             localStorage["groupPlans"] = 0;
         } else {
             localStorage["groupPlans"] = 1;
@@ -59,7 +60,8 @@
         });
 
         $.each(groups, function(key, value) {
-            var $wrapper = $("<div class='plansGroupWrapper' data-object-id='" + key + "'></div>");
+            var isHidden = localStorage["foldedGroups"] && JSON.parse(localStorage["foldedGroups"]).indexOf(key) > -1;
+                $wrapper = $("<div class='plansGroupWrapper" + (isHidden ? " folded" : "") + "' data-object-id='" + key + "'></div>");
             $("[plan_id][object_id='" + key + "']")
                 .prependTo($(".plansGeneralWrapper"))
                 .wrapAll($wrapper);
@@ -73,14 +75,13 @@
 
         $(".plansGroupToggle").on("click", function() {
             $(this).closest(".plansGroupWrapper").toggleClass("folded");
+            writeAllToStorage();
         });
 
         $(".plansGroupWrapper").customSortable();
     } else {
         $(".plansGeneralWrapper").customSortable();
     }
-
-
 
     if (localStorage["plansOrder"]) { //if order local storage is defined, reorder plans in the storage order. new plans will be positioned on top
         var orderArray = JSON.parse(localStorage["plansOrder"]);
@@ -102,6 +103,7 @@
     function writeAllToStorage() { //save all the data
         writeOrderToStorage();
         writeOpacityToStorage();
+        writeFoldedGroups();
     }
     function writeOrderToStorage() {
         var orderArray = [];
@@ -118,6 +120,15 @@
             if ($(this).css("opacity") != 1) opacityArray.push(id);
         });
         localStorage["plansOpacity"] = JSON.stringify(opacityArray);
+    }
+    function writeFoldedGroups() {
+        if (!groupPlans) return;
+        var foldedGroupsArray = [];
+        $(".plansGroupWrapper.folded").each(function() {
+            var id = $(this).attr("data-object-id");
+            foldedGroupsArray.push(id);
+        });
+        localStorage["foldedGroups"] = JSON.stringify(foldedGroupsArray);
     }
 
 })(jQuery);

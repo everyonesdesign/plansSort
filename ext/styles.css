@@ -40,7 +40,7 @@ div.plan {
 }
 
 .plansGroupWrapper {
-    padding-bottom: 40px;
+    padding-bottom: 30px;
 }
 
 .plansGroupWrapper.folded [plan_id] {

@@ -79,3 +79,7 @@ div.plan {
     margin-top: -25px;
 }
 
+.plansGroupMode label {
+    display: inline;
+}
+

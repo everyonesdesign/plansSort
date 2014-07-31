@@ -1,4 +1,13 @@
+/*
+*
+*   TODO: передвигать группы
+*   TODO: плавно показывать планы при загрузке
+*
+ */
+
+
 (function ($) {
+
 
 //if page has not loaded return
     if (!$("#content").length) return;

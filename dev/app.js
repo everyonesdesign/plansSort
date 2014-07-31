@@ -1,10 +1,3 @@
-/*
- *
- *   TODO: передвигать группы
- *
- */
-
-
 (function ($) {
 
 //if page has not loaded return

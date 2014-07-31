@@ -7,7 +7,6 @@
 
 (function ($) {
 
-
 //if page has not loaded return
     if (!$("#content").length) return;
 
@@ -30,7 +29,7 @@
         writeAllToStorage();
     });
 
-    $.fn.customSortable = function () {
+    $.fn.customSortable = function () { //sortable settings to sort plans
         $(this).sortable({
             items: "[plan_id]",
             axis: "y",
@@ -55,7 +54,8 @@
 
 
     if (groupPlans) {
-        var groups = {};
+        var groups = {},
+            groupsOrder = JSON.parse(localStorage["groupsOrder"]);
         $plans.each(function() {
             var thisGroup = $(this).attr("object_id");
             if (!groups[thisGroup]) {
@@ -74,6 +74,7 @@
                 .prependTo($(".plansGeneralWrapper"))
                 .wrapAll($wrapper);
             $(".plansGroupWrapper[data-object-id='" + key + "']").prepend("<div class='plansGroupWrapper-info'>" +
+                "<div class='plansGroupWrapper-handle'></div>" +
                 "<span><a href='/staff/sites/?site_id=" + key + "'>Сайт #" + key + "</a></span>" +
                 "<span class='domainName'><a href='http://" + value.domain + "'>" + value.domain + "</a></span>" +
                 "<span>Количество планов: " + value.number + "</span>" +
@@ -81,12 +82,27 @@
             "</div>");
         });
 
+        if (groupsOrder) {
+            for (var i= 1; i<groupsOrder.length; i++) {
+                $(".plansGroupWrapper[data-object-id='" + groupsOrder[i] + "']").appendTo(".plansGeneralWrapper");
+            }
+        }
+
         $(".plansGroupToggle").on("click", function() {
             $(this).closest(".plansGroupWrapper").toggleClass("folded");
             writeAllToStorage();
         });
 
         $(".plansGroupWrapper").customSortable();
+
+        $(".plansGeneralWrapper").sortable({//sortable settings for groups sorting
+            items: ".plansGroupWrapper",
+            axis: "y",
+            tolerance: "pointer",
+            handle: ".plansGroupWrapper-handle",
+            stop: writeAllToStorage //on sortable complete renew data in storage
+        });
+
     } else {
         $(".plansGeneralWrapper").customSortable();
     }
@@ -112,6 +128,7 @@
         writeOrderToStorage();
         writeOpacityToStorage();
         writeFoldedGroups();
+        writeGroupsOrder();
     }
     function writeOrderToStorage() {
         var orderArray = [];
@@ -137,6 +154,15 @@
             foldedGroupsArray.push(id);
         });
         localStorage["foldedGroups"] = JSON.stringify(foldedGroupsArray);
+    }
+    function writeGroupsOrder() {
+        var orderArray = [];
+        if (!groupPlans) return;
+        $(".plansGroupWrapper").each(function () { //we have to reselect it to update the structure
+            var id = $(this).attr("data-object-id");
+            orderArray.push(id);
+        });
+        localStorage["groupsOrder"] = JSON.stringify(orderArray);
     }
 
 })(jQuery);

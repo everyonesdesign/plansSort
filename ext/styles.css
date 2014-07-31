@@ -4,8 +4,14 @@
     visibility: visible !important;
 }
 
-div.plan {
+div[plan_id] {
     margin-bottom: 0 !important;
+    opacity: 0;
+    transition: .2s opacity;
+}
+
+.plansGeneralWrapper div[plan_id] {
+    opacity: 1;
 }
 
 .plan-icons {

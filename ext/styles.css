@@ -7,7 +7,6 @@
 div[plan_id] {
     margin: 20px 0;
     opacity: 0;
-    transition: .2s opacity;
 }
 
 .plansGeneralWrapper div[plan_id] {

@@ -1,7 +1,7 @@
 /*
-*
-*   TODO: передвигать группы
-*
+ *
+ *   TODO: передвигать группы
+ *
  */
 
 
@@ -19,7 +19,7 @@
         .append("<div class='plan-icons'>" +
             "<div class='plan-icon plan-changeOpacity'></div>" +
             "<div class='plan-icon plan-moveHandle'></div>" +
-        "</div>")
+            "</div>")
         .wrapAll("<div class='plansGeneralWrapper'></div>");
 
     $(".plan-changeOpacity").on("click", function() {
@@ -41,7 +41,7 @@
 
     $(".plansGeneralWrapper").before("<div class='plansGroupMode'>" +
         "<label><input id='plansSortToggle' type='checkbox'" + (groupPlans ? " checked" : "") + "> группировать по сайтам</label>" +
-    "</div>");
+        "</div>");
 
     $("#plansSortToggle").change(function() {
         if (groupPlans) {
@@ -55,7 +55,7 @@
 
     if (groupPlans) {
         var groups = {},
-            groupsOrder = JSON.parse(localStorage["groupsOrder"]);
+            groupsOrder = localStorage["groupsOrder"] ? JSON.parse(localStorage["groupsOrder"]) : false;
         $plans.each(function() {
             var thisGroup = $(this).attr("object_id");
             if (!groups[thisGroup]) {
@@ -69,7 +69,7 @@
 
         $.each(groups, function(key, value) {
             var isHidden = localStorage["foldedGroups"] && JSON.parse(localStorage["foldedGroups"]).indexOf(key) > -1;
-                $wrapper = $("<div class='plansGroupWrapper" + (isHidden ? " folded" : "") + "' data-object-id='" + key + "'></div>");
+            $wrapper = $("<div class='plansGroupWrapper" + (isHidden ? " folded" : "") + "' data-object-id='" + key + "'></div>");
             $("[plan_id][object_id='" + key + "']")
                 .prependTo($(".plansGeneralWrapper"))
                 .wrapAll($wrapper);
@@ -79,7 +79,7 @@
                 "<span class='domainName'><a href='http://" + value.domain + "'>" + value.domain + "</a></span>" +
                 "<span>Количество планов: " + value.number + "</span>" +
                 "<span class='plansGroupToggle'><a href='javascript:;'>Свернуть/развернуть</a></span>" +
-            "</div>");
+                "</div>");
         });
 
         if (groupsOrder) {

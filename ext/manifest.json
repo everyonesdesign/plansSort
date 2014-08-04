@@ -23,7 +23,7 @@
             "app.min.js"
         ],
         "run_at": "document_end",
-        "css": ["styles.css"]
+        "css": ["styles.min.css"]
       }
     ]
 }

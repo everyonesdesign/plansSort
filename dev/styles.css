@@ -11,14 +11,9 @@ div[plan_id] {
     opacity: 0;
 }
 
-div[plan_id]:hover {
-    z-index: 1;
-}
-
-div[plan_id]:before {
+div[plan_id]:hover:before {
     content: "";
     position: absolute;
-    z-index: -1;
     top: 0;
     left: -21px;
     width: 21px;
@@ -31,10 +26,15 @@ div[plan_id]:before {
 
 .plan-icons {
     position: absolute;
+    z-index: 2;
     top: 33px;
     left: -21px;
     visibility: hidden;
     opacity: 0;
+}
+
+a.anchor {
+    z-index: 1;
 }
 
 div[plan_id]:hover .plan-icons {

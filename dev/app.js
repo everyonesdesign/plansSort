@@ -6,7 +6,6 @@ var plansSort = {
 
     globals: {
       $plans: $("[plan_id]"),
-      groupPlans: localStorage["groupPlans"]==1||false
     },
 
     markup: {
@@ -29,6 +28,8 @@ var plansSort = {
     },
 
     init: function() {
+
+        plansSort.globals.groupPlans = plansSort.read.groupsEnabled();
 
         //bootstrap
         plansSort.bootstrap();
@@ -76,9 +77,9 @@ var plansSort = {
     bindGroupModeToggle: function() {
         $("#plansSortToggle").change(function() {
             if (plansSort.globals.groupPlans) {
-                localStorage["groupPlans"] = 0;
+                plansSort.write.groupsEnabled(0);
             } else {
-                localStorage["groupPlans"] = 1;
+                plansSort.write.groupsEnabled(1);
             }
             window.location.reload();
         });
@@ -103,8 +104,8 @@ var plansSort = {
     },
 
     sortPlans: function() {
-        if (localStorage["plansOrder"]) { //if order local storage is defined, reorder plans in the storage order. new plans will be positioned on top
-            var orderArray = JSON.parse(localStorage["plansOrder"]);
+        if (plansSort.read.plansOrder()) { //if order local storage is defined, reorder plans in the storage order. new plans will be positioned on top
+            var orderArray = plansSort.read.plansOrder();
             for (var i = 0; i < orderArray.length; i++) {
                 plansSort.globals.$plans.each(function () {
                     if ($(this).attr("plan_id") == orderArray[i]) {
@@ -116,8 +117,8 @@ var plansSort = {
     },
 
     setPlansOpacity: function() {
-        if (localStorage["plansOpacity"]) { //if opacity local storage is defined apply it
-            var opacityArray = JSON.parse(localStorage["plansOpacity"]);
+        if (plansSort.read.plansOpacity()) { //if opacity local storage is defined apply it
+            var opacityArray = plansSort.read.plansOpacity();
             for (var i = 0; i < opacityArray.length; i++) {
                 plansSort.globals.$plans.filter("[plan_id='" + opacityArray[i] + "']").css("opacity", plansSort.options.hiddenOpacity);
             }
@@ -127,7 +128,7 @@ var plansSort = {
     initPlansGrouped: function() {
 
         var groups = {},
-            groupsOrder = localStorage["groupsOrder"] ? JSON.parse(localStorage["groupsOrder"]) : false;
+            groupsOrder = plansSort.read.groupsOrder();
 
         /*define groups and count elements in it*/
         plansSort.globals.$plans.each(function() {
@@ -143,7 +144,7 @@ var plansSort = {
 
         /*place in group markup*/
         $.each(groups, function(key, value) {
-            var folded = localStorage["foldedGroups"] && JSON.parse(localStorage["foldedGroups"]).indexOf(key) > -1,
+            var folded = plansSort.read.groupsFolded() && plansSort.read.groupsFolded().indexOf(key) > -1,
                 foldedText = folded ? " folded" : "",
                 $plans = $("[plan_id][object_id='" + key + "']"),
                 $wrapper;
@@ -180,6 +181,27 @@ var plansSort = {
 
     initPlansUngrouped: function() {
         plansSort.makeSortable($(".plansGeneralWrapper"));
+    },
+
+
+    /**** ALL THE METHODS OF ACTIONS WITH STORAGE ARE HERE ****/
+
+    read: {
+        plansOrder: function() {
+            return JSON.parse(localStorage["plansOrder"]);
+        },
+        plansOpacity: function() {
+            return JSON.parse(localStorage["plansOpacity"]);
+        },
+        groupsEnabled: function() {
+            return JSON.parse(localStorage["groupPlans"]) === 1;
+        },
+        groupsOrder: function() {
+            return JSON.parse(localStorage["groupsOrder"]);
+        },
+        groupsFolded: function() {
+            return JSON.parse(localStorage["foldedGroups"]);
+        }
     },
 
     write: {
@@ -228,9 +250,11 @@ var plansSort = {
                 foldedGroupsArray.push(id);
             });
             localStorage["foldedGroups"] = JSON.stringify(foldedGroupsArray);
+        },
+        groupsEnabled: function(value) {//this method isn't in write.all() 'cause it requires a value
+            localStorage["groupPlans"] = value;
         }
     }
-
 
 };
 

@@ -18,6 +18,7 @@
         "js": [
             "jquery.min.js",
             "jquery-ui.min.js",
+            "highlightRegex.min.js",
             "app.min.js"
         ],
         "run_at": "document_end",

@@ -147,7 +147,10 @@ var plansSort = {
         $(".plansSearch").on("input", function() {
                 var $this = $(this),
                     $plans = $("[plan_id]"),
-                    needle = $this.val();
+                    needle = $.trim($this.val());
+                $(".plansSearch-mark").each(function() {
+                   this.outerHTML = this.innerHTML;
+                });
                 if (needle) {
                     $plans.each(function() {
                         var $plan = $(this),
@@ -156,12 +159,17 @@ var plansSort = {
                                              .add($plan.find(".plan_comments"))
                                              .add($plan.find(".site-domain"))
                                              .add($plan.find(".site-domain").prev());
+                        /*$(this).highlightRegex({ //remove highlighting
+                            tagType: 'mark',
+                            className: 'plansSearch-mark'
+                        });*/
                         $haystack.each(function() {
-                           var html;
-                           $(this).html($(this).html().replace(/<\/?mark>/, ""));
-                           html = $(this).html();
-                           if (html.toLowerCase().indexOf(needle.toLowerCase()) > -1 ) {
-                               $(this).html(html.replace(new RegExp(plansSort.globals.escapeRegExp(needle), "g"), "<mark>$&</mark>"));
+                           var text = $(this).text();
+                           if (text.toLowerCase().indexOf(needle.toLowerCase()) > -1 ) {
+                               $(this).highlightRegex(new RegExp(plansSort.globals.escapeRegExp(needle), "gi"), {
+                                   tagType: 'mark',
+                                   className: 'plansSearch-mark'
+                               });
                                matched = true
                            }
                            $plan.css("display", matched ? "" : "none");

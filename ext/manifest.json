@@ -12,10 +12,8 @@
   "content_scripts": [
       {
         "matches": [
-            "https://staff.megagroup.ru/staff/client/plan.my.php",
-            "https://staff.megagroup.ru/staff/client/plan.my.php/",
-            "http://staff.oml.ru/staff/client/plan.my.php",
-            "http://staff.oml.ru/staff/client/plan.my.php/"
+            "https://staff.megagroup.ru/staff/*",
+            "http://staff.oml.ru/staff/client/*"
         ],
         "js": [
             "jquery.min.js",

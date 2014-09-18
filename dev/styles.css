@@ -8,7 +8,6 @@ div[plan_id] {
     position: relative;
     /*z-index: 0;*/
     margin: 20px 0;
-    opacity: 0;
 }
 
 div[plan_id]:before {
@@ -113,13 +112,19 @@ div[plan_id]:hover .plan-icons {
     margin-left: 40px;
 }
 
-.plansGroupMode {
+.plansTopPanel {
     text-align: right;
     padding: 10px 20px;
     margin: -33px 0 -15px;
 }
 
-.plansGroupMode label {
+.plansTopPanel label {
     display: inline;
+    margin: 0 18px;
+    vertical-align: middle;
+}
+
+.plansTopPanel .btn {
+    padding: 3px 6px;
 }
 

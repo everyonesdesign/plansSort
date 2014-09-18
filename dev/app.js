@@ -390,16 +390,28 @@ if (localStorage["foldedGroups"]||
     localStorage["groupsOrder"]||
     localStorage["plansOpacity"]||
     localStorage["plansOrder"]) {
-    localStorage["foldedGroups at /staff/client/plan.my.php"] = localStorage["foldedGroups"];
-    localStorage["groupPlans at /staff/client/plan.my.php"] = localStorage["groupPlans"];
-    localStorage["groupsOrder at /staff/client/plan.my.php"] = localStorage["groupsOrder"];
-    localStorage["plansOpacity at /staff/client/plan.my.php"] = localStorage["plansOpacity"];
-    localStorage["plansOrder at /staff/client/plan.my.php"] = localStorage["plansOrder"];
-    localStorage.removeItem("foldedGroups");
-    localStorage.removeItem("groupPlans");
-    localStorage.removeItem("groupsOrder");
-    localStorage.removeItem("plansOpacity");
-    localStorage.removeItem("plansOrder");
+
+    if (localStorage["foldedGroups"]) {
+        localStorage["foldedGroups at /staff/client/plan.my.php"] = localStorage["foldedGroups"];
+        localStorage.removeItem("foldedGroups");
+    }
+    if (localStorage["groupPlans"]) {
+        localStorage["groupPlans at /staff/client/plan.my.php"] = localStorage["groupPlans"];
+        localStorage.removeItem("groupPlans");
+    }
+    if (localStorage["groupsOrder"]) {
+        localStorage["groupsOrder at /staff/client/plan.my.php"] = localStorage["groupsOrder"];
+        localStorage.removeItem("groupsOrder");
+    }
+    if (localStorage["plansOpacity"]) {
+        localStorage["plansOpacity at /staff/client/plan.my.php"] = localStorage["plansOpacity"];
+        localStorage.removeItem("plansOpacity");
+    }
+    if (localStorage["plansOrder"]) {
+        localStorage["plansOrder at /staff/client/plan.my.php"] = localStorage["plansOrder"];
+        localStorage.removeItem("plansOrder");
+    }
+
 }
 
 if ($("#content").length && plansSort.globals.$plans.length) { //if page not loaded or no plans on page then return;

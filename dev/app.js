@@ -4,14 +4,13 @@ var plansSort = {
         hiddenOpacity: 0.4,
         defaultAllowedUrls: [
             "/staff/client/plan.my.php",
-            "/staff/client/plan.my.php/"
         ]
     },
 
     globals: {
       $plans: $("[plan_id]"),
-      currentUrl: window.location.pathname+window.location.search,
-      currentLocation: " at "+ window.location.pathname+window.location.search
+      currentUrl: /(.*?)\/?$/.exec(window.location.pathname)[1]+window.location.search,
+      currentLocation: " at "+ /(.*?)\/?$/.exec(window.location.pathname)[1]+window.location.search
     },
 
     markup: {
@@ -22,7 +21,7 @@ var plansSort = {
         plansGeneralWrapper: "<div class='plansGeneralWrapper'></div>",
         plansTopPanelEnabled: "<div class='plansTopPanel'>" +
                                 "<label><input class='plansGroupModeToggle' type='checkbox' %checked%> группировать по сайтам</label>" +
-                                "<button class='btn btn-danger plansSortToggle plansSortToggle--disable'>Отключить сортировку</button>" +
+                                "<button class='btn plansSortToggle plansSortToggle--disable'>Отключить сортировку</button>" +
                               "</div>",
         plansTopPanelDisabled: "<div class='plansTopPanel'>" +
                                   "<button class='btn btn-success plansSortToggle plansSortToggle--enable'>Включить сортировку</button>" +

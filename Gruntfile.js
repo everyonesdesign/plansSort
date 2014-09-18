@@ -18,6 +18,13 @@ module.exports = function(grunt) {
                 options: {
                     spawn: false
                 }
+            },
+            dev: {
+                files: ['dev/app.js','dev/styles.css'],
+                tasks: ['copy', 'cssmin'],
+                options: {
+                    spawn: false
+                }
             }
         },
         cssmin: {
@@ -26,14 +33,22 @@ module.exports = function(grunt) {
                     'ext/styles.min.css': ['dev/styles.css']
                 }
             }
+        },
+        copy: {//for non-minified dev js file
+            main: {
+                src: 'dev/app.js',
+                dest: 'ext/app.min.js'
+            }
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-contrib-copy');
 
     grunt.registerTask('default', ['watch']);
     grunt.registerTask('run', ['uglify', 'cssmin']);
+    grunt.registerTask('dev', ['watch:dev']);
 
 };

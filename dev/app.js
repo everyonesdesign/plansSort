@@ -16,7 +16,7 @@ var plansSort = {
                       "</div>",
         plansGeneralWrapper: "<div class='plansGeneralWrapper'></div>",
         groupModeToggle: "<div class='plansGroupMode'>" +
-                            "<label><input id='plansSortToggle' type='checkbox'" + (plansSort.globals.groupPlans ? " checked" : "") + "> группировать по сайтам</label>" +
+                            "<label><input id='plansSortToggle' type='checkbox' %checked%> группировать по сайтам</label>" +
                          "</div>",
         plansGroupWrapper: "<div class='plansGroupWrapper %folded%' data-object-id='%key%'></div>",
         plansGroupWrapperInfo: "<div class='plansGroupWrapper-info'>" +
@@ -49,11 +49,13 @@ var plansSort = {
     },
 
     bootstrap: function() {
+        var checked = plansSort.globals.groupPlans ? " checked" : "";
+
         plansSort.globals.$plans
             .append(plansSort.markup.plansControls)
             .wrapAll(plansSort.markup.plansGeneralWrapper);
 
-        $(".plansGeneralWrapper").before(plansSort.markup.groupModeToggle);
+        $(".plansGeneralWrapper").before(plansSort.markup.groupModeToggle.replace("%checked%", checked));
     },
 
     bindPlansControls: function() {
@@ -73,7 +75,7 @@ var plansSort = {
 
     bindGroupModeToggle: function() {
         $("#plansSortToggle").change(function() {
-            if (groupPlans) {
+            if (plansSort.globals.groupPlans) {
                 localStorage["groupPlans"] = 0;
             } else {
                 localStorage["groupPlans"] = 1;
@@ -117,7 +119,7 @@ var plansSort = {
         if (localStorage["plansOpacity"]) { //if opacity local storage is defined apply it
             var opacityArray = JSON.parse(localStorage["plansOpacity"]);
             for (var i = 0; i < opacityArray.length; i++) {
-                plansSort.globals.$plans.filter("[plan_id='" + opacityArray[i] + "']").css("opacity", opacityToSet);
+                plansSort.globals.$plans.filter("[plan_id='" + opacityArray[i] + "']").css("opacity", plansSort.options.hiddenOpacity);
             }
         }
     },
@@ -197,7 +199,7 @@ var plansSort = {
         },
         plansOpacity: function() {
             var opacityArray = [];
-            $plans.each(function () {
+            $("[plan_id]").each(function () {
                 var id = $(this).attr("plan_id");
                 if ($(this).css("opacity") != 1) {
                     opacityArray.push(id);
@@ -232,7 +234,7 @@ var plansSort = {
 
 };
 
-if ($("#content").length && $plans.length) { //if page not loaded or no plans on page then return;
+if ($("#content").length && plansSort.globals.$plans.length) { //if page not loaded or no plans on page then return;
     plansSort.init();
 }
 

@@ -11,7 +11,7 @@ div[plan_id] {
     opacity: 0;
 }
 
-div[plan_id]:hover:before {
+div[plan_id]:before {
     content: "";
     position: absolute;
     top: 0;

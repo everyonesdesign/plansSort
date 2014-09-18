@@ -6,6 +6,10 @@ module.exports = function(grunt) {
             build: {
                 src: 'dev/app.js',
                 dest: 'ext/app.min.js'
+            },
+            coffee: {
+                src: 'dev/app-coffee.js',
+                dest: 'ext/app.min.js'
             }
         },
         watch: {
@@ -13,10 +17,17 @@ module.exports = function(grunt) {
                 files: ['Gruntfile.js']
             },
             scripts: {
-                files: ['dev/app.js','dev/styles.css'],
-                tasks: ['uglify', 'cssmin'],
+                files: ['dev/app.js','dev/styles.css', 'dev/*.coffee'],
+                tasks: ['run'],
                 options: {
                     spawn: false
+                }
+            }
+        },
+        coffee: {
+            compile: {
+                files: {
+                    'dev/app-coffee.js': 'dev/coffee/*.coffee' // 1:1 compile
                 }
             }
         },
@@ -32,8 +43,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-contrib-coffee');
 
+    grunt.registerTask('run', ['coffee', 'uglify:coffee', 'cssmin']);
     grunt.registerTask('default', ['watch']);
-    grunt.registerTask('run', ['uglify', 'cssmin']);
 
 };

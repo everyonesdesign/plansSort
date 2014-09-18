@@ -20,10 +20,12 @@ var plansSort = {
                       "</div>",
         plansGeneralWrapper: "<div class='plansGeneralWrapper'></div>",
         plansTopPanelEnabled: "<div class='plansTopPanel'>" +
+                                "<input class='plansSearch' type='text' placeholder='Поиск по планам'>" +
                                 "<label><input class='plansGroupModeToggle' type='checkbox' %checked%> группировать по сайтам</label>" +
                                 "<button class='btn plansSortToggle plansSortToggle--disable'>Отключить сортировку</button>" +
                               "</div>",
         plansTopPanelDisabled: "<div class='plansTopPanel'>" +
+                                  "<input class='plansSearch' type='text' placeholder='Поиск по планам'>" +
                                   "<button class='btn btn-success plansSortToggle plansSortToggle--enable'>Включить сортировку</button>" +
                                "</div>",
         plansGroupWrapper: "<div class='plansGroupWrapper %folded%' data-object-id='%key%'></div>",
@@ -51,6 +53,7 @@ var plansSort = {
             plansSort.bindPlansControls();
             plansSort.bindGroupModeToggle();
             plansSort.bindSortToggle();
+            plansSort.bindPlansSearch();
 
             if (plansSort.globals.groupPlans) {
                 plansSort.initPlansGrouped();
@@ -65,6 +68,7 @@ var plansSort = {
 
             plansSort.bootstrapUnallowedUrl();
             plansSort.bindSortToggle();
+            plansSort.bindPlansSearch();
 
         }
 
@@ -126,13 +130,39 @@ var plansSort = {
     },
 
     bindSortToggle: function() {
-        $(".plansSortToggle").click(function() {
+        $(".plansSortToggle").on("click", function() {
             if ($(this).hasClass("plansSortToggle--enable")) {
                 plansSort.write.allowedUrls(plansSort.globals.currentUrl, "add");
             } else {
                 plansSort.write.allowedUrls(plansSort.globals.currentUrl, "delete");
             }
             window.location.reload();
+        });
+    },
+
+    bindPlansSearch: function() {
+        $(".plansSearch").on("input", function() {
+                var $this = $(this),
+                    $plans = $("[plan_id]"),
+                    needle = $this.val();
+                if (needle) {
+                    $plans.each(function() {
+                        var $plan = $(this),
+                            matched = false,
+                            $haystack = $plan.find(".plan_body")
+                                             .add($plan.find(".plan_comments"))
+                                             .add($plan.find(".site-domain"))
+                                             .add($plan.find(".site-domain").prev());
+                        $haystack.each(function() {
+                           if ($(this).text().toLowerCase().indexOf(needle.toLowerCase()) > -1 ) {
+                               matched = true
+                           }
+                           $plan.css("display", matched ? "" : "none");
+                        });
+                    });
+                } else {
+                    $plans.show();
+                }
         });
     },
 

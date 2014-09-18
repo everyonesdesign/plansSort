@@ -3,7 +3,7 @@ var plansSort = {
     options: {
         hiddenOpacity: 0.4,
         defaultAllowedUrls: [
-            "/staff/client/plan.my.php",
+            "/staff/client/plan.my.php"
         ]
     },
 
@@ -383,6 +383,24 @@ var plansSort = {
     }
 
 };
+
+//compatibility with ver.2.0.0
+if (localStorage["foldedGroups"]||
+    localStorage["groupPlans"]||
+    localStorage["groupsOrder"]||
+    localStorage["plansOpacity"]||
+    localStorage["plansOrder"]) {
+    localStorage["foldedGroups at /staff/client/plan.my.php"] = localStorage["foldedGroups"];
+    localStorage["groupPlans at /staff/client/plan.my.php"] = localStorage["groupPlans"];
+    localStorage["groupsOrder at /staff/client/plan.my.php"] = localStorage["groupsOrder"];
+    localStorage["plansOpacity at /staff/client/plan.my.php"] = localStorage["plansOpacity"];
+    localStorage["plansOrder at /staff/client/plan.my.php"] = localStorage["plansOrder"];
+    localStorage.removeItem("foldedGroups");
+    localStorage.removeItem("groupPlans");
+    localStorage.removeItem("groupsOrder");
+    localStorage.removeItem("plansOpacity");
+    localStorage.removeItem("plansOrder");
+}
 
 if ($("#content").length && plansSort.globals.$plans.length) { //if page not loaded or no plans on page then return;
     plansSort.init();

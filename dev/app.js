@@ -3,15 +3,15 @@ var plansSort = {
     options: {
         hiddenOpacity: 0.4,
         defaultAllowedUrls: [
-            "https://staff.megagroup.ru/staff/client/plan.my.php",
-            "https://staff.megagroup.ru/staff/client/plan.my.php/",
-            "http://staff.oml.ru/staff/client/plan.my.php",
-            "http://staff.oml.ru/staff/client/plan.my.php/"
+            "/staff/client/plan.my.php",
+            "/staff/client/plan.my.php/"
         ]
     },
 
     globals: {
-      $plans: $("[plan_id]")
+      $plans: $("[plan_id]"),
+      currentUrl: window.location.pathname+window.location.search,
+      currentLocation: " at "+ window.location.pathname+window.location.search
     },
 
     markup: {
@@ -91,7 +91,7 @@ var plansSort = {
     },
 
     isUrlAllowed: function() {
-      return plansSort.globals.allowedUrls.indexOf(document.URL) > -1;
+      return plansSort.globals.allowedUrls.indexOf(plansSort.globals.currentUrl) > -1;
     },
 
     bindPlansControls: function() {
@@ -129,9 +129,9 @@ var plansSort = {
     bindSortToggle: function() {
         $(".plansSortToggle").click(function() {
             if ($(this).hasClass("plansSortToggle--enable")) {
-                plansSort.write.allowedUrls(document.URL, "add");
+                plansSort.write.allowedUrls(plansSort.globals.currentUrl, "add");
             } else {
-                plansSort.write.allowedUrls(document.URL, "delete");
+                plansSort.write.allowedUrls(plansSort.globals.currentUrl, "delete");
             }
             window.location.reload();
         });
@@ -232,32 +232,32 @@ var plansSort = {
 
     read: {
         plansOrder: function() {
-            if (localStorage["plansOrder"]) {
-                return JSON.parse(localStorage["plansOrder"]);
+            if (localStorage["plansOrder"+plansSort.globals.currentLocation]) {
+                return JSON.parse(localStorage["plansOrder"+plansSort.globals.currentLocation]);
             } else {
                 return false;
             }
         },
         plansOpacity: function() {
-            if (localStorage["plansOpacity"]) {
-                return JSON.parse(localStorage["plansOpacity"]);
+            if (localStorage["plansOpacity"+plansSort.globals.currentLocation]) {
+                return JSON.parse(localStorage["plansOpacity"+plansSort.globals.currentLocation]);
             } else {
                 return false;
             }
         },
         groupsEnabled: function() {
-            return localStorage["groupPlans"] == 1;
+            return localStorage["groupPlans"+plansSort.globals.currentLocation] == 1;
         },
         groupsOrder: function() {
-            if (localStorage["groupsOrder"]) {
-                return JSON.parse(localStorage["groupsOrder"]);
+            if (localStorage["groupsOrder"+plansSort.globals.currentLocation]) {
+                return JSON.parse(localStorage["groupsOrder"+plansSort.globals.currentLocation]);
             } else {
                 return false;
             }
         },
         groupsFolded: function() {
-            if (localStorage["foldedGroups"]) {
-                return JSON.parse(localStorage["foldedGroups"]);
+            if (localStorage["foldedGroups"+plansSort.globals.currentLocation]) {
+                return JSON.parse(localStorage["foldedGroups"+plansSort.globals.currentLocation]);
             } else {
                 return false;
             }
@@ -284,7 +284,7 @@ var plansSort = {
                 var id = $(this).attr("plan_id");
                 orderArray.push(id);
             });
-            localStorage["plansOrder"] = JSON.stringify(orderArray);
+            localStorage["plansOrder"+plansSort.globals.currentLocation] = JSON.stringify(orderArray);
         },
         plansOpacity: function() {
             var opacityArray = [];
@@ -294,7 +294,7 @@ var plansSort = {
                     opacityArray.push(id);
                 }
             });
-            localStorage["plansOpacity"] = JSON.stringify(opacityArray);
+            localStorage["plansOpacity"+plansSort.globals.currentLocation] = JSON.stringify(opacityArray);
         },
         groupsOrder: function() {
             var orderArray = [];
@@ -305,7 +305,7 @@ var plansSort = {
                 var id = $(this).attr("data-object-id");
                 orderArray.push(id);
             });
-            localStorage["groupsOrder"] = JSON.stringify(orderArray);
+            localStorage["groupsOrder"+plansSort.globals.currentLocation] = JSON.stringify(orderArray);
         },
         groupsFolded: function() {
             if (!plansSort.globals.groupPlans) {
@@ -316,10 +316,10 @@ var plansSort = {
                 var id = $(this).attr("data-object-id");
                 foldedGroupsArray.push(id);
             });
-            localStorage["foldedGroups"] = JSON.stringify(foldedGroupsArray);
+            localStorage["foldedGroups"+plansSort.globals.currentLocation] = JSON.stringify(foldedGroupsArray);
         },
         groupsEnabled: function(value) {//this method isn't in write.all() 'cause it requires a value
-            localStorage["groupPlans"] = value;
+            localStorage["groupPlans"+plansSort.globals.currentLocation] = value;
         },
         allowedUrls: function(element, action) {
             var allowedUrlsArray;

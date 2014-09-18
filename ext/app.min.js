@@ -10,7 +10,10 @@ var plansSort = {
     globals: {
       $plans: $("[plan_id]"),
       currentUrl: /(.*?)\/?$/.exec(window.location.pathname)[1]+window.location.search,
-      currentLocation: " at "+ /(.*?)\/?$/.exec(window.location.pathname)[1]+window.location.search
+      currentLocation: " at "+ /(.*?)\/?$/.exec(window.location.pathname)[1]+window.location.search,
+      escapeRegExp: function(string) {
+        return string.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+      }
     },
 
     markup: {
@@ -154,7 +157,11 @@ var plansSort = {
                                              .add($plan.find(".site-domain"))
                                              .add($plan.find(".site-domain").prev());
                         $haystack.each(function() {
-                           if ($(this).text().toLowerCase().indexOf(needle.toLowerCase()) > -1 ) {
+                           var html;
+                           $(this).html($(this).html().replace(/<\/?mark>/, ""));
+                           html = $(this).html();
+                           if (html.toLowerCase().indexOf(needle.toLowerCase()) > -1 ) {
+                               $(this).html(html.replace(new RegExp(plansSort.globals.escapeRegExp(needle), "g"), "<mark>$&</mark>"));
                                matched = true
                            }
                            $plan.css("display", matched ? "" : "none");

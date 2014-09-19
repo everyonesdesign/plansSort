@@ -10,6 +10,14 @@ div[plan_id] {
     margin: 20px 0;
 }
 
+.body--plansSearch div[plan_id] {
+    display: none;
+}
+
+div[plan_id].matched {
+    display: block !important;
+}
+
 div[plan_id]:before {
     content: "";
     position: absolute;

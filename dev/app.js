@@ -152,6 +152,7 @@ var plansSort = {
                    this.outerHTML = this.innerHTML;
                 });
                 if (needle) {
+                    $(document.body).addClass("body--plansSearch");
                     $plans.each(function() {
                         var $plan = $(this),
                             matched = false,
@@ -159,10 +160,6 @@ var plansSort = {
                                              .add($plan.find(".plan_comments"))
                                              .add($plan.find(".site-domain"))
                                              .add($plan.find(".site-domain").prev());
-                        /*$(this).highlightRegex({ //remove highlighting
-                            tagType: 'mark',
-                            className: 'plansSearch-mark'
-                        });*/
                         $haystack.each(function() {
                            var text = $(this).text();
                            if (text.toLowerCase().indexOf(needle.toLowerCase()) > -1 ) {
@@ -172,11 +169,12 @@ var plansSort = {
                                });
                                matched = true
                            }
-                           $plan.css("display", matched ? "" : "none");
+                           $plan.toggleClass("matched", matched);
                         });
                     });
                 } else {
-                    $plans.show();
+                    $(document.body).removeClass("body--plansSearch");
+                    $plans.removeClass("matched");
                 }
         });
     },

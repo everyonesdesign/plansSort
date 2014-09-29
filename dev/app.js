@@ -1,4 +1,4 @@
-var plansSort = {
+var plansManager = {
 
     options: {
         hiddenOpacity: 0.4,
@@ -43,61 +43,61 @@ var plansSort = {
 
     init: function() {
 
-        plansSort.globals.groupPlans = plansSort.read.groupsEnabled();
+        plansManager.globals.groupPlans = plansManager.read.groupsEnabled();
 
-        plansSort.setAllowedUrls();
+        plansManager.setAllowedUrls();
 
-        if (plansSort.isUrlAllowed()) {
+        if (plansManager.isUrlAllowed()) {
 
             //bootstrap
-            plansSort.bootstrapAllowedUrl();
+            plansManager.bootstrapAllowedUrl();
 
             //bindings
-            plansSort.bindPlansControls();
-            plansSort.bindGroupModeToggle();
-            plansSort.bindSortToggle();
-            plansSort.bindPlansSearch();
+            plansManager.bindPlansControls();
+            plansManager.bindGroupModeToggle();
+            plansManager.bindSortToggle();
+            plansManager.bindPlansSearch();
 
-            if (plansSort.globals.groupPlans) {
-                plansSort.initPlansGrouped();
+            if (plansManager.globals.groupPlans) {
+                plansManager.initPlansGrouped();
             } else {
-                plansSort.initPlansUngrouped();
+                plansManager.initPlansUngrouped();
             }
 
-            plansSort.sortPlans();
-            plansSort.setPlansOpacity();
+            plansManager.sortPlans();
+            plansManager.setPlansOpacity();
 
         } else {
 
-            plansSort.bootstrapUnallowedUrl();
-            plansSort.bindSortToggle();
-            plansSort.bindPlansSearch();
+            plansManager.bootstrapUnallowedUrl();
+            plansManager.bindSortToggle();
+            plansManager.bindPlansSearch();
 
         }
 
     },
 
     bootstrapAllowedUrl: function() {
-        var checked = plansSort.globals.groupPlans ? " checked" : "";
+        var checked = plansManager.globals.groupPlans ? " checked" : "";
 
-        plansSort.globals.$plans
-            .append(plansSort.markup.plansControls)
-            .wrapAll(plansSort.markup.plansGeneralWrapper);
+        plansManager.globals.$plans
+            .append(plansManager.markup.plansControls)
+            .wrapAll(plansManager.markup.plansGeneralWrapper);
 
-        $(".plansGeneralWrapper").before(plansSort.markup.plansTopPanelEnabled.replace("%checked%", checked));
+        $(".plansGeneralWrapper").before(plansManager.markup.plansTopPanelEnabled.replace("%checked%", checked));
     },
 
     bootstrapUnallowedUrl: function() {
         //TODO: find a better way to paste the element
-        $(".attach_call_container").after(plansSort.markup.plansTopPanelDisabled);
+        $(".attach_call_container").after(plansManager.markup.plansTopPanelDisabled);
     },
 
     setAllowedUrls: function() {
-      plansSort.globals.allowedUrls = plansSort.read.allowedUrls() || plansSort.options.defaultAllowedUrls;
+      plansManager.globals.allowedUrls = plansManager.read.allowedUrls() || plansManager.options.defaultAllowedUrls;
     },
 
     isUrlAllowed: function() {
-      return plansSort.globals.allowedUrls.indexOf(plansSort.globals.currentUrl) > -1;
+      return plansManager.globals.allowedUrls.indexOf(plansManager.globals.currentUrl) > -1;
     },
 
     bindPlansControls: function() {
@@ -105,21 +105,21 @@ var plansSort = {
         $(".plan-changeOpacity").on("click", function() {
             var $plan = $(this).closest("[plan_id]");
             if ($plan.css("opacity") == 1) {
-                $plan.css("opacity", plansSort.options.hiddenOpacity);
+                $plan.css("opacity", plansManager.options.hiddenOpacity);
             } else {
                 $plan.css("opacity", 1);
             }
-            plansSort.write.all();
+            plansManager.write.all();
         });
 
     },
 
     bindGroupModeToggle: function() {
         $(".plansGroupModeToggle").change(function() {
-            if (plansSort.globals.groupPlans) {
-                plansSort.write.groupsEnabled(0);
+            if (plansManager.globals.groupPlans) {
+                plansManager.write.groupsEnabled(0);
             } else {
-                plansSort.write.groupsEnabled(1);
+                plansManager.write.groupsEnabled(1);
             }
             window.location.reload();
         });
@@ -128,16 +128,16 @@ var plansSort = {
     bindGroupToggle: function() {
         $(".plansGroupToggle").on("click", function() {
             $(this).closest(".plansGroupWrapper").toggleClass("folded");
-            plansSort.write.all();
+            plansManager.write.all();
         });
     },
 
     bindSortToggle: function() {
         $(".plansSortToggle").on("click", function() {
             if ($(this).hasClass("plansSortToggle--enable")) {
-                plansSort.write.allowedUrls(plansSort.globals.currentUrl, "add");
+                plansManager.write.allowedUrls(plansManager.globals.currentUrl, "add");
             } else {
-                plansSort.write.allowedUrls(plansSort.globals.currentUrl, "delete");
+                plansManager.write.allowedUrls(plansManager.globals.currentUrl, "delete");
             }
             window.location.reload();
         });
@@ -163,7 +163,7 @@ var plansSort = {
                         $haystack.each(function() {
                            var text = $(this).text();
                            if (text.toLowerCase().indexOf(needle.toLowerCase()) > -1 ) {
-                               $(this).highlightRegex(new RegExp(plansSort.globals.escapeRegExp(needle), "gi"), {
+                               $(this).highlightRegex(new RegExp(plansManager.globals.escapeRegExp(needle), "gi"), {
                                    tagType: 'mark',
                                    className: 'plansSearch-mark'
                                });
@@ -185,15 +185,15 @@ var plansSort = {
             axis: "y",
             tolerance: "pointer",
             handle: ".plan-moveHandle",
-            stop: plansSort.write.all //on sortable complete renew data in storage
+            stop: plansManager.write.all //on sortable complete renew data in storage
         });
     },
 
     sortPlans: function() {
-        if (plansSort.read.plansOrder()) { //if order local storage is defined, reorder plans in the storage order. new plans will be positioned on top
-            var orderArray = plansSort.read.plansOrder();
+        if (plansManager.read.plansOrder()) { //if order local storage is defined, reorder plans in the storage order. new plans will be positioned on top
+            var orderArray = plansManager.read.plansOrder();
             for (var i = 0; i < orderArray.length; i++) {
-                plansSort.globals.$plans.each(function () {
+                plansManager.globals.$plans.each(function () {
                     if ($(this).attr("plan_id") == orderArray[i]) {
                         $(this).appendTo($(this).parent());
                     }
@@ -203,10 +203,10 @@ var plansSort = {
     },
 
     setPlansOpacity: function() {
-        if (plansSort.read.plansOpacity()) { //if opacity local storage is defined apply it
-            var opacityArray = plansSort.read.plansOpacity();
+        if (plansManager.read.plansOpacity()) { //if opacity local storage is defined apply it
+            var opacityArray = plansManager.read.plansOpacity();
             for (var i = 0; i < opacityArray.length; i++) {
-                plansSort.globals.$plans.filter("[plan_id='" + opacityArray[i] + "']").css("opacity", plansSort.options.hiddenOpacity);
+                plansManager.globals.$plans.filter("[plan_id='" + opacityArray[i] + "']").css("opacity", plansManager.options.hiddenOpacity);
             }
         }
     },
@@ -214,10 +214,10 @@ var plansSort = {
     initPlansGrouped: function() {
 
         var groups = {},
-            groupsOrder = plansSort.read.groupsOrder();
+            groupsOrder = plansManager.read.groupsOrder();
 
         /*define groups and count elements in it*/
-        plansSort.globals.$plans.each(function() {
+        plansManager.globals.$plans.each(function() {
             var thisGroup = $(this).attr("object_id");
             if (!groups[thisGroup]) {
                 groups[thisGroup] = {};
@@ -230,15 +230,15 @@ var plansSort = {
 
         /*place in group markup*/
         $.each(groups, function(key, value) {
-            var folded = plansSort.read.groupsFolded() && plansSort.read.groupsFolded().indexOf(key) > -1,
+            var folded = plansManager.read.groupsFolded() && plansManager.read.groupsFolded().indexOf(key) > -1,
                 foldedText = folded ? " folded" : "",
                 $plans = $("[plan_id][object_id='" + key + "']"),
                 $wrapper;
-            $wrapper = $(plansSort.markup.plansGroupWrapper.replace("%folded%", foldedText).replace("%key%", key));
+            $wrapper = $(plansManager.markup.plansGroupWrapper.replace("%folded%", foldedText).replace("%key%", key));
             $plans.prependTo($(".plansGeneralWrapper"));
             $plans.wrapAll($wrapper);
             $(".plansGroupWrapper[data-object-id='" + key + "']").prepend(
-                plansSort.markup.plansGroupWrapperInfo
+                plansManager.markup.plansGroupWrapperInfo
                     .replace(/%key%/g, key)
                     .replace(/%domain%/g, value.domain)
                     .replace(/%number%/g, value.number)
@@ -252,54 +252,55 @@ var plansSort = {
             }
         }
 
-        plansSort.bindGroupToggle();
-        plansSort.makeSortable($(".plansGroupWrapper"));
+        plansManager.bindGroupToggle();
+        plansManager.makeSortable($(".plansGroupWrapper"));
 
         $(".plansGeneralWrapper").sortable({//sortable settings for groups sorting
             items: ".plansGroupWrapper",
             axis: "y",
             tolerance: "pointer",
             handle: ".plansGroupWrapper-handle",
-            stop: plansSort.write.all //on sortable complete renew data in storage
+            stop: plansManager.write.all //on sortable complete renew data in storage
         });
 
     },
 
     initPlansUngrouped: function() {
-        plansSort.makeSortable($(".plansGeneralWrapper"));
+        plansManager.makeSortable($(".plansGeneralWrapper"));
     },
+
 
 
     /**** ALL THE METHODS OF ACTIONS WITH STORAGE ARE HERE ****/
 
     read: {
         plansOrder: function() {
-            if (localStorage["plansOrder"+plansSort.globals.currentLocation]) {
-                return JSON.parse(localStorage["plansOrder"+plansSort.globals.currentLocation]);
+            if (localStorage["plansOrder"+plansManager.globals.currentLocation]) {
+                return JSON.parse(localStorage["plansOrder"+plansManager.globals.currentLocation]);
             } else {
                 return false;
             }
         },
         plansOpacity: function() {
-            if (localStorage["plansOpacity"+plansSort.globals.currentLocation]) {
-                return JSON.parse(localStorage["plansOpacity"+plansSort.globals.currentLocation]);
+            if (localStorage["plansOpacity"+plansManager.globals.currentLocation]) {
+                return JSON.parse(localStorage["plansOpacity"+plansManager.globals.currentLocation]);
             } else {
                 return false;
             }
         },
         groupsEnabled: function() {
-            return localStorage["groupPlans"+plansSort.globals.currentLocation] == 1;
+            return localStorage["groupPlans"+plansManager.globals.currentLocation] == 1;
         },
         groupsOrder: function() {
-            if (localStorage["groupsOrder"+plansSort.globals.currentLocation]) {
-                return JSON.parse(localStorage["groupsOrder"+plansSort.globals.currentLocation]);
+            if (localStorage["groupsOrder"+plansManager.globals.currentLocation]) {
+                return JSON.parse(localStorage["groupsOrder"+plansManager.globals.currentLocation]);
             } else {
                 return false;
             }
         },
         groupsFolded: function() {
-            if (localStorage["foldedGroups"+plansSort.globals.currentLocation]) {
-                return JSON.parse(localStorage["foldedGroups"+plansSort.globals.currentLocation]);
+            if (localStorage["foldedGroups"+plansManager.globals.currentLocation]) {
+                return JSON.parse(localStorage["foldedGroups"+plansManager.globals.currentLocation]);
             } else {
                 return false;
             }
@@ -315,10 +316,10 @@ var plansSort = {
 
     write: {
         all: function() {
-            plansSort.write.plansOrder();
-            plansSort.write.plansOpacity();
-            plansSort.write.groupsOrder();
-            plansSort.write.groupsFolded();
+            plansManager.write.plansOrder();
+            plansManager.write.plansOpacity();
+            plansManager.write.groupsOrder();
+            plansManager.write.groupsFolded();
         },
         plansOrder: function() {
             var orderArray = [];
@@ -326,7 +327,7 @@ var plansSort = {
                 var id = $(this).attr("plan_id");
                 orderArray.push(id);
             });
-            localStorage["plansOrder"+plansSort.globals.currentLocation] = JSON.stringify(orderArray);
+            localStorage["plansOrder"+plansManager.globals.currentLocation] = JSON.stringify(orderArray);
         },
         plansOpacity: function() {
             var opacityArray = [];
@@ -336,21 +337,21 @@ var plansSort = {
                     opacityArray.push(id);
                 }
             });
-            localStorage["plansOpacity"+plansSort.globals.currentLocation] = JSON.stringify(opacityArray);
+            localStorage["plansOpacity"+plansManager.globals.currentLocation] = JSON.stringify(opacityArray);
         },
         groupsOrder: function() {
             var orderArray = [];
-            if (!plansSort.globals.groupPlans) {
+            if (!plansManager.globals.groupPlans) {
                 return;
             }
             $(".plansGroupWrapper").each(function () { //we have to reselect it to update the structure
                 var id = $(this).attr("data-object-id");
                 orderArray.push(id);
             });
-            localStorage["groupsOrder"+plansSort.globals.currentLocation] = JSON.stringify(orderArray);
+            localStorage["groupsOrder"+plansManager.globals.currentLocation] = JSON.stringify(orderArray);
         },
         groupsFolded: function() {
-            if (!plansSort.globals.groupPlans) {
+            if (!plansManager.globals.groupPlans) {
                 return;
             }
             var foldedGroupsArray = [];
@@ -358,18 +359,18 @@ var plansSort = {
                 var id = $(this).attr("data-object-id");
                 foldedGroupsArray.push(id);
             });
-            localStorage["foldedGroups"+plansSort.globals.currentLocation] = JSON.stringify(foldedGroupsArray);
+            localStorage["foldedGroups"+plansManager.globals.currentLocation] = JSON.stringify(foldedGroupsArray);
         },
         groupsEnabled: function(value) {//this method isn't in write.all() 'cause it requires a value
-            localStorage["groupPlans"+plansSort.globals.currentLocation] = value;
+            localStorage["groupPlans"+plansManager.globals.currentLocation] = value;
         },
         allowedUrls: function(element, action) {
             var allowedUrlsArray;
             if (action === "add") {
-                plansSort.globals.allowedUrls.push(element);
-                allowedUrlsArray = plansSort.globals.allowedUrls;
+                plansManager.globals.allowedUrls.push(element);
+                allowedUrlsArray = plansManager.globals.allowedUrls;
             } else if (action === "delete") {
-                allowedUrlsArray = $.map(plansSort.globals.allowedUrls, function(value) {
+                allowedUrlsArray = $.map(plansManager.globals.allowedUrls, function(value) {
                     if (value===element) {
                         return null; //this will delete the element
                     }
@@ -382,37 +383,8 @@ var plansSort = {
 
 };
 
-//compatibility with ver.2.0.0
-if (localStorage["foldedGroups"]||
-    localStorage["groupPlans"]||
-    localStorage["groupsOrder"]||
-    localStorage["plansOpacity"]||
-    localStorage["plansOrder"]) {
 
-    if (localStorage["foldedGroups"]) {
-        localStorage["foldedGroups at /staff/client/plan.my.php"] = localStorage["foldedGroups"];
-        localStorage.removeItem("foldedGroups");
-    }
-    if (localStorage["groupPlans"]) {
-        localStorage["groupPlans at /staff/client/plan.my.php"] = localStorage["groupPlans"];
-        localStorage.removeItem("groupPlans");
-    }
-    if (localStorage["groupsOrder"]) {
-        localStorage["groupsOrder at /staff/client/plan.my.php"] = localStorage["groupsOrder"];
-        localStorage.removeItem("groupsOrder");
-    }
-    if (localStorage["plansOpacity"]) {
-        localStorage["plansOpacity at /staff/client/plan.my.php"] = localStorage["plansOpacity"];
-        localStorage.removeItem("plansOpacity");
-    }
-    if (localStorage["plansOrder"]) {
-        localStorage["plansOrder at /staff/client/plan.my.php"] = localStorage["plansOrder"];
-        localStorage.removeItem("plansOrder");
-    }
-
-}
-
-if ($("#content").length && plansSort.globals.$plans.length) { //if page not loaded or no plans on page then return;
-    plansSort.init();
+if ($("#content").length && plansManager.globals.$plans.length) { //if page not loaded or no plans on page then return;
+    plansManager.init();
 }
 

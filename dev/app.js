@@ -281,6 +281,9 @@ var plansManager = {
                 return false;
             }
         },
+        timestamp: function() {
+            return +localStorage["plansOrderTimestamp"];
+        },
         plansOpacity: function() {
             if (localStorage["plansOpacity"+plansManager.globals.currentLocation]) {
                 return JSON.parse(localStorage["plansOpacity"+plansManager.globals.currentLocation]);
@@ -320,6 +323,9 @@ var plansManager = {
             plansManager.write.plansOpacity();
             plansManager.write.groupsOrder();
             plansManager.write.groupsFolded();
+        },
+        timestamp: function() {
+          localStorage["plansOrderTimestamp"] = +(new Date());
         },
         plansOrder: function() {
             var orderArray = [];
@@ -378,6 +384,18 @@ var plansManager = {
                 });
             }
             localStorage["allowedUrls"] = JSON.stringify(allowedUrlsArray);
+        }
+    },
+
+    sync: {
+        pull: function() {
+
+        },
+        push: function() {
+
+        },
+        clear: function() {
+
         }
     }
 

@@ -334,6 +334,7 @@ var plansManager = {
                 orderArray.push(id);
             });
             localStorage["plansOrder"+plansManager.globals.currentLocation] = JSON.stringify(orderArray);
+            plansManager.write.timestamp();
         },
         plansOpacity: function() {
             var opacityArray = [];
@@ -344,6 +345,7 @@ var plansManager = {
                 }
             });
             localStorage["plansOpacity"+plansManager.globals.currentLocation] = JSON.stringify(opacityArray);
+            plansManager.write.timestamp();
         },
         groupsOrder: function() {
             var orderArray = [];
@@ -355,6 +357,7 @@ var plansManager = {
                 orderArray.push(id);
             });
             localStorage["groupsOrder"+plansManager.globals.currentLocation] = JSON.stringify(orderArray);
+            plansManager.write.timestamp();
         },
         groupsFolded: function() {
             if (!plansManager.globals.groupPlans) {
@@ -366,9 +369,11 @@ var plansManager = {
                 foldedGroupsArray.push(id);
             });
             localStorage["foldedGroups"+plansManager.globals.currentLocation] = JSON.stringify(foldedGroupsArray);
+            plansManager.write.timestamp();
         },
         groupsEnabled: function(value) {//this method isn't in write.all() 'cause it requires a value
             localStorage["groupPlans"+plansManager.globals.currentLocation] = value;
+            plansManager.write.timestamp();
         },
         allowedUrls: function(element, action) {
             var allowedUrlsArray;
@@ -384,25 +389,54 @@ var plansManager = {
                 });
             }
             localStorage["allowedUrls"] = JSON.stringify(allowedUrlsArray);
+            plansManager.write.timestamp();
         }
     },
 
     sync: {
         pull: function() {
-
+            chrome.storage.sync.get(null, function(items) {
+                plansManager.sync.clearLocal();
+                for (var i=0; i<items.length; i++) {
+                    localStorage[i.name] = i.value;
+                }
+                plansManager.write.timestamp(); //set local timestamp after sync
+            });
         },
         push: function() {
-
+            var objectToPush = {};
+            chrome.storage.sync.clear();
+            $.each(localStorage, function(name, value) {
+                objectToPush[name] = value;
+            });
+            chrome.storage.sync.set(objectToPush, function() {
+                plansManager.sync.pull();
+            });
         },
-        clear: function() {
-
+        clearLocal: function() {
+            for (var i = 0; i < localStorage.length; i++){
+                localStorage.removeItem(localStorage.key(i));
+            }
+        },
+        sync: function() {
+            chrome.storage.sync.get("plansOrderTimestamp", function(syncedTimestamp) {
+                if (syncedTimestamp["plansOrderTimestamp"] > plansManager.read.timestamp()) { // if synced is newer than local then pull
+                    plansManager.sync.pull();
+                } else { // else push
+                    plansManager.sync.push();
+                }
+            });
+        },
+        startAutoSync: function() {
+            setInterval(plansManager.sync.sync, 10 * 60 * 1000);
         }
     }
 
 };
 
+plansManager.sync.startAutoSync();
 
-if ($("#content").length && plansManager.globals.$plans.length) { //if page not loaded or no plans on page then return;
+if ($("#content").length && plansManager.globals.$plans.length) { //if page not loaded or no plans on page then return
     plansManager.init();
 }
 

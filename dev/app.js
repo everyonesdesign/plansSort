@@ -46,6 +46,7 @@ var plansManager = {
         plansManager.globals.groupPlans = plansManager.read.groupsEnabled();
 
         plansManager.setAllowedUrls();
+        plansManager.sync.startAutoSync();
 
         if (plansManager.isUrlAllowed()) {
 
@@ -418,13 +419,14 @@ var plansManager = {
                 localStorage.removeItem(localStorage.key(i));
             }
         },
-        sync: function() {
+        sync: function(callback) {
             chrome.storage.sync.get("plansOrderTimestamp", function(syncedTimestamp) {
                 if (syncedTimestamp["plansOrderTimestamp"] > plansManager.read.timestamp()) { // if synced is newer than local then pull
                     plansManager.sync.pull();
                 } else { // else push
                     plansManager.sync.push();
                 }
+                callback();
             });
         },
         startAutoSync: function() {
@@ -434,9 +436,9 @@ var plansManager = {
 
 };
 
-plansManager.sync.startAutoSync();
-
 if ($("#content").length && plansManager.globals.$plans.length) { //if page not loaded or no plans on page then return
-    plansManager.init();
+    plansManager.sync.sync(function() { //at first sync then init
+        plansManager.init();
+    });
 }
 

@@ -10,7 +10,7 @@ var plansManager = {
     globals: {
         $plans: $("[plan_id]"),
         currentUrl: /(.*?)\/?$/.exec(window.location.pathname)[1] + window.location.search,
-        currentLocation: " at " + /(.*?)\/?$/.exec(window.location.pathname)[1] + window.location.search,
+        currentLocation: " at " + window.location.href,
         escapeRegExp: function (string) {
             return string.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
         }
@@ -474,28 +474,7 @@ var plansManager = {
 
 };
 
-
-//compatibility with ver.2.0.2
-
-if (localStorage.length) {
-    (function() {
-        var objectToPush = {};
-        chrome.storage.sync.clear();
-        $.each(localStorage, function(name, value) {
-            objectToPush[name] = value;
-            localStorage.removeItem(localStorage.key(name));
-        });
-        chrome.storage.sync.set(objectToPush, function() {
-            if ($("#content").length && plansManager.globals.$plans.length) { //if page not loaded or no plans on page then return
-                plansManager.init();
-            }
-        });
-    }());
-
-} else { //usual run
-    if ($("#content").length && plansManager.globals.$plans.length) { //if page not loaded or no plans on page then return
-        plansManager.init();
-    }
+if ($("#content").length && plansManager.globals.$plans.length) { //if page not loaded or no plans on page then return
+    plansManager.init();
 }
-
 

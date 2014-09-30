@@ -425,11 +425,14 @@ var plansManager = {
         sync: function(callback) {
             chrome.storage.sync.get("plansOrderTimestamp", function(syncedTimestamp) {
                 if (
-                    syncedTimestamp["plansOrderTimestamp"] &&
-                        ( syncedTimestamp["plansOrderTimestamp"] > plansManager.read.timestamp() ||
-                            !plansManager.read.timestamp() )
+                    syncedTimestamp["plansOrderTimestamp"] && //synced value exists
+                        ( syncedTimestamp["plansOrderTimestamp"] > plansManager.read.timestamp() || //and it's either newer than local
+                            !plansManager.read.timestamp() ) && //or there's no local
+                        window.confirm("PlansManager: На другом компьютере обнаружены более новые параметры сортировки. Синхронизировать?") // and user agrees
                     ) { // if synced is newer than local then pull
-                    plansManager.sync.pull(callback);
+                    plansManager.sync.pull(function() {
+                        window.location.reload();
+                    });
                 } else { // else push
                     plansManager.sync.push(callback);
                 }
@@ -443,8 +446,7 @@ var plansManager = {
 };
 
 if ($("#content").length && plansManager.globals.$plans.length) { //if page not loaded or no plans on page then return
-    plansManager.sync.sync( //at first sync then init
-        plansManager.init
-    );
+    plansManager.init();
+    plansManager.sync.sync();
 }
 

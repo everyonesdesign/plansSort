@@ -407,12 +407,11 @@ var plansManager = {
         push: function() {
             var objectToPush = {};
             chrome.storage.sync.clear();
+            plansManager.write.timestamp();
             $.each(localStorage, function(name, value) {
                 objectToPush[name] = value;
             });
-            chrome.storage.sync.set(objectToPush, function() {
-                plansManager.sync.pull();
-            });
+            chrome.storage.sync.set(objectToPush);
         },
         clearLocal: function() {
             for (var i = 0; i < localStorage.length; i++){
@@ -421,7 +420,11 @@ var plansManager = {
         },
         sync: function(callback) {
             chrome.storage.sync.get("plansOrderTimestamp", function(syncedTimestamp) {
-                if (syncedTimestamp["plansOrderTimestamp"] > plansManager.read.timestamp()) { // if synced is newer than local then pull
+                if (
+                        syncedTimestamp["plansOrderTimestamp"] &&
+                        ( syncedTimestamp["plansOrderTimestamp"] > plansManager.read.timestamp() ||
+                          !plansManager.read.timestamp() )
+                    ) { // if synced is newer than local then pull
                     plansManager.sync.pull();
                 } else { // else push
                     plansManager.sync.push();
@@ -437,8 +440,8 @@ var plansManager = {
 };
 
 if ($("#content").length && plansManager.globals.$plans.length) { //if page not loaded or no plans on page then return
-    plansManager.sync.sync(function() { //at first sync then init
-        plansManager.init();
-    });
+    plansManager.sync.sync( //at first sync then init
+        plansManager.init
+    );
 }
 

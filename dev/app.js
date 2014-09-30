@@ -9,9 +9,9 @@ var plansManager = {
 
     globals: {
         $plans: $("[plan_id]"),
-        currentUrl: /(.*?)\/?$/.exec(window.location.pathname)[1]+window.location.search,
-        currentLocation: " at "+ /(.*?)\/?$/.exec(window.location.pathname)[1]+window.location.search,
-        escapeRegExp: function(string) {
+        currentUrl: /(.*?)\/?$/.exec(window.location.pathname)[1] + window.location.search,
+        currentLocation: " at " + /(.*?)\/?$/.exec(window.location.pathname)[1] + window.location.search,
+        escapeRegExp: function (string) {
             return string.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
         }
     },
@@ -41,44 +41,53 @@ var plansManager = {
             "</div>"
     },
 
-    init: function() {
+    init: function () {
 
-        plansManager.globals.groupPlans = plansManager.read.groupsEnabled();
+        plansManager.read.groupsEnabled(function (obj) {
 
-        plansManager.setAllowedUrls();
-        plansManager.sync.startAutoSync();
+            plansManager.globals.groupPlans = obj;
 
-        if (plansManager.isUrlAllowed()) {
+            plansManager.setAllowedUrls(function () {
 
-            //bootstrap
-            plansManager.bootstrapAllowedUrl();
+                plansManager.sync.startAutoSync();
 
-            //bindings
-            plansManager.bindPlansControls();
-            plansManager.bindGroupModeToggle();
-            plansManager.bindSortToggle();
-            plansManager.bindPlansSearch();
 
-            if (plansManager.globals.groupPlans) {
-                plansManager.initPlansGrouped();
-            } else {
-                plansManager.initPlansUngrouped();
-            }
+                if (plansManager.isUrlAllowed()) {
 
-            plansManager.sortPlans();
-            plansManager.setPlansOpacity();
+                    //bootstrap
+                    plansManager.bootstrapAllowedUrl();
 
-        } else {
+                    //bindings
+                    plansManager.bindPlansControls();
+                    plansManager.bindGroupModeToggle();
+                    plansManager.bindSortToggle();
+                    plansManager.bindPlansSearch();
 
-            plansManager.bootstrapUnallowedUrl();
-            plansManager.bindSortToggle();
-            plansManager.bindPlansSearch();
+                    if (plansManager.globals.groupPlans) {
+                        plansManager.initPlansGrouped();
+                    } else {
+                        plansManager.initPlansUngrouped();
+                    }
 
-        }
+                    plansManager.sortPlans();
+                    plansManager.setPlansOpacity();
+
+                } else {
+
+                    plansManager.bootstrapUnallowedUrl();
+                    plansManager.bindSortToggle();
+                    plansManager.bindPlansSearch();
+
+                }
+
+            });
+
+
+        });
 
     },
 
-    bootstrapAllowedUrl: function() {
+    bootstrapAllowedUrl: function () {
         var checked = plansManager.globals.groupPlans ? " checked" : "";
 
         plansManager.globals.$plans
@@ -88,22 +97,25 @@ var plansManager = {
         $(".plansGeneralWrapper").before(plansManager.markup.plansTopPanelEnabled.replace("%checked%", checked));
     },
 
-    bootstrapUnallowedUrl: function() {
+    bootstrapUnallowedUrl: function () {
         //TODO: find a better way to paste the element
         $(".attach_call_container").after(plansManager.markup.plansTopPanelDisabled);
     },
 
-    setAllowedUrls: function() {
-        plansManager.globals.allowedUrls = plansManager.read.allowedUrls() || plansManager.options.defaultAllowedUrls;
+    setAllowedUrls: function (callback) {
+        plansManager.read.allowedUrls(function (obj) {
+            plansManager.globals.allowedUrls = obj || plansManager.options.defaultAllowedUrls;
+            callback();
+        });
     },
 
-    isUrlAllowed: function() {
+    isUrlAllowed: function () {
         return plansManager.globals.allowedUrls.indexOf(plansManager.globals.currentUrl) > -1;
     },
 
-    bindPlansControls: function() {
+    bindPlansControls: function () {
 
-        $(".plan-changeOpacity").on("click", function() {
+        $(".plan-changeOpacity").on("click", function () {
             var $plan = $(this).closest("[plan_id]");
             if ($plan.css("opacity") == 1) {
                 $plan.css("opacity", plansManager.options.hiddenOpacity);
@@ -115,8 +127,8 @@ var plansManager = {
 
     },
 
-    bindGroupModeToggle: function() {
-        $(".plansGroupModeToggle").change(function() {
+    bindGroupModeToggle: function () {
+        $(".plansGroupModeToggle").change(function () {
             if (plansManager.globals.groupPlans) {
                 plansManager.write.groupsEnabled(0);
             } else {
@@ -126,15 +138,15 @@ var plansManager = {
         });
     },
 
-    bindGroupToggle: function() {
-        $(".plansGroupToggle").on("click", function() {
+    bindGroupToggle: function () {
+        $(".plansGroupToggle").on("click", function () {
             $(this).closest(".plansGroupWrapper").toggleClass("folded");
             plansManager.write.all();
         });
     },
 
-    bindSortToggle: function() {
-        $(".plansSortToggle").on("click", function() {
+    bindSortToggle: function () {
+        $(".plansSortToggle").on("click", function () {
             if ($(this).hasClass("plansSortToggle--enable")) {
                 plansManager.write.allowedUrls(plansManager.globals.currentUrl, "add");
             } else {
@@ -144,26 +156,26 @@ var plansManager = {
         });
     },
 
-    bindPlansSearch: function() {
-        $(".plansSearch").on("input", function() {
+    bindPlansSearch: function () {
+        $(".plansSearch").on("input", function () {
             var $this = $(this),
                 $plans = $("[plan_id]"),
                 needle = $.trim($this.val());
-            $(".plansSearch-mark").each(function() {
+            $(".plansSearch-mark").each(function () {
                 this.outerHTML = this.innerHTML;
             });
             if (needle) {
                 $(document.body).addClass("body--plansSearch");
-                $plans.each(function() {
+                $plans.each(function () {
                     var $plan = $(this),
                         matched = false,
                         $haystack = $plan.find(".plan_body")
                             .add($plan.find(".plan_comments"))
                             .add($plan.find(".site-domain"))
                             .add($plan.find(".site-domain").prev());
-                    $haystack.each(function() {
+                    $haystack.each(function () {
                         var text = $(this).text();
-                        if (text.toLowerCase().indexOf(needle.toLowerCase()) > -1 ) {
+                        if (text.toLowerCase().indexOf(needle.toLowerCase()) > -1) {
                             $(this).highlightRegex(new RegExp(plansManager.globals.escapeRegExp(needle), "gi"), {
                                 tagType: 'mark',
                                 className: 'plansSearch-mark'
@@ -180,7 +192,7 @@ var plansManager = {
         });
     },
 
-    makeSortable: function($obj) {
+    makeSortable: function ($obj) {
         $obj.sortable({
             items: "[plan_id]",
             axis: "y",
@@ -190,9 +202,9 @@ var plansManager = {
         });
     },
 
-    sortPlans: function() {
-        if (plansManager.read.plansOrder()) { //if order local storage is defined, reorder plans in the storage order. new plans will be positioned on top
-            var orderArray = plansManager.read.plansOrder();
+    sortPlans: function () {
+        plansManager.read.plansOrder(function (orderArray) {
+            if (!orderArray) return;
             for (var i = 0; i < orderArray.length; i++) {
                 plansManager.globals.$plans.each(function () {
                     if ($(this).attr("plan_id") == orderArray[i]) {
@@ -200,156 +212,164 @@ var plansManager = {
                     }
                 });
             }
-        }
+        });
     },
 
-    setPlansOpacity: function() {
-        if (plansManager.read.plansOpacity()) { //if opacity local storage is defined apply it
-            var opacityArray = plansManager.read.plansOpacity();
+    setPlansOpacity: function () {
+        plansManager.read.plansOpacity(function (opacityArray) {
+            if (!opacityArray) return;
             for (var i = 0; i < opacityArray.length; i++) {
                 plansManager.globals.$plans.filter("[plan_id='" + opacityArray[i] + "']").css("opacity", plansManager.options.hiddenOpacity);
             }
-        }
-    },
-
-    initPlansGrouped: function() {
-
-        var groups = {},
-            groupsOrder = plansManager.read.groupsOrder();
-
-        /*define groups and count elements in it*/
-        plansManager.globals.$plans.each(function() {
-            var thisGroup = $(this).attr("object_id");
-            if (!groups[thisGroup]) {
-                groups[thisGroup] = {};
-                groups[thisGroup].domain = $(this).find(".site-domain").text();
-                groups[thisGroup].number = 1;
-            } else {
-                groups[thisGroup].number++;
-            }
-        });
-
-        /*place in group markup*/
-        $.each(groups, function(key, value) {
-            var folded = plansManager.read.groupsFolded() && plansManager.read.groupsFolded().indexOf(key) > -1,
-                foldedText = folded ? " folded" : "",
-                $plans = $("[plan_id][object_id='" + key + "']"),
-                $wrapper;
-            $wrapper = $(plansManager.markup.plansGroupWrapper.replace("%folded%", foldedText).replace("%key%", key));
-            $plans.prependTo($(".plansGeneralWrapper"));
-            $plans.wrapAll($wrapper);
-            $(".plansGroupWrapper[data-object-id='" + key + "']").prepend(
-                plansManager.markup.plansGroupWrapperInfo
-                    .replace(/%key%/g, key)
-                    .replace(/%domain%/g, value.domain)
-                    .replace(/%number%/g, value.number)
-            );
-        });
-
-        /*sort groups order*/
-        if (groupsOrder) {
-            for (var i= 0; i<groupsOrder.length; i++) {
-                $(".plansGroupWrapper[data-object-id='" + groupsOrder[i] + "']").appendTo(".plansGeneralWrapper");
-            }
-        }
-
-        plansManager.bindGroupToggle();
-        plansManager.makeSortable($(".plansGroupWrapper"));
-
-        $(".plansGeneralWrapper").sortable({//sortable settings for groups sorting
-            items: ".plansGroupWrapper",
-            axis: "y",
-            tolerance: "pointer",
-            handle: ".plansGroupWrapper-handle",
-            stop: plansManager.write.all //on sortable complete renew data in storage
         });
 
     },
 
-    initPlansUngrouped: function() {
+    initPlansGrouped: function () {
+
+        var groups = {};
+
+        plansManager.read.groupsOrder(function (groupsOrder) {
+
+            plansManager.read.groupsFolded(function (groupsFolded) {
+
+                /*define groups and count elements in it*/
+                plansManager.globals.$plans.each(function () {
+                    var thisGroup = $(this).attr("object_id");
+                    if (!groups[thisGroup]) {
+                        groups[thisGroup] = {};
+                        groups[thisGroup].domain = $(this).find(".site-domain").text();
+                        groups[thisGroup].number = 1;
+                    } else {
+                        groups[thisGroup].number++;
+                    }
+                });
+
+                /*place in group markup*/
+                $.each(groups, function (key, value) {
+                    var folded = groupsFolded && groupsFolded.indexOf(key) > -1,
+                        foldedText = folded ? " folded" : "",
+                        $plans = $("[plan_id][object_id='" + key + "']"),
+                        $wrapper;
+                    $wrapper = $(plansManager.markup.plansGroupWrapper.replace("%folded%", foldedText).replace("%key%", key));
+                    $plans.prependTo($(".plansGeneralWrapper"));
+                    $plans.wrapAll($wrapper);
+                    $(".plansGroupWrapper[data-object-id='" + key + "']").prepend(
+                        plansManager.markup.plansGroupWrapperInfo
+                            .replace(/%key%/g, key)
+                            .replace(/%domain%/g, value.domain)
+                            .replace(/%number%/g, value.number)
+                    );
+                });
+
+                /*sort groups order*/
+                if (groupsOrder) {
+                    for (var i = 0; i < groupsOrder.length; i++) {
+                        $(".plansGroupWrapper[data-object-id='" + groupsOrder[i] + "']").appendTo(".plansGeneralWrapper");
+                    }
+                }
+
+                plansManager.bindGroupToggle();
+                plansManager.makeSortable($(".plansGroupWrapper"));
+
+                $(".plansGeneralWrapper").sortable({//sortable settings for groups sorting
+                    items: ".plansGroupWrapper",
+                    axis: "y",
+                    tolerance: "pointer",
+                    handle: ".plansGroupWrapper-handle",
+                    stop: plansManager.write.all //on sortable complete renew data in storage
+                });
+
+            });
+
+        });
+
+    },
+
+    initPlansUngrouped: function () {
         plansManager.makeSortable($(".plansGeneralWrapper"));
     },
-
 
 
     /**** ALL THE METHODS OF ACTIONS WITH STORAGE ARE HERE ****/
 
     read: {
-        plansOrder: function() {
-            if (localStorage["plansOrder"+plansManager.globals.currentLocation]) {
-                return JSON.parse(localStorage["plansOrder"+plansManager.globals.currentLocation]);
-            } else {
-                return false;
-            }
+        plansOrder: function (callback) {
+            chrome.storage.local.get("plansOrder" + plansManager.globals.currentLocation, function (object) {
+                callback(object["plansOrder" + plansManager.globals.currentLocation] ? JSON.parse(object["plansOrder" + plansManager.globals.currentLocation]) : false);
+            });
         },
-        timestamp: function() {
-            return +localStorage["plansOrderTimestamp"];
+        timestamp: function (callback) {
+            chrome.storage.local.get("plansOrderTimestamp", function (object) {
+                callback(+object["plansOrderTimestamp"] || false);
+            });
         },
-        plansOpacity: function() {
-            if (localStorage["plansOpacity"+plansManager.globals.currentLocation]) {
-                return JSON.parse(localStorage["plansOpacity"+plansManager.globals.currentLocation]);
-            } else {
-                return false;
-            }
+        plansOpacity: function (callback) {
+            chrome.storage.local.get(["plansOpacity" + plansManager.globals.currentLocation], function (object) {
+                callback(object["plansOpacity" + plansManager.globals.currentLocation] ? JSON.parse(object["plansOpacity" + plansManager.globals.currentLocation]) : false);
+            });
         },
-        groupsEnabled: function() {
-            return localStorage["groupPlans"+plansManager.globals.currentLocation] == 1;
+        groupsEnabled: function (callback) {
+            chrome.storage.local.get("groupPlans" + plansManager.globals.currentLocation, function (object) {
+                callback(!!object["groupPlans" + plansManager.globals.currentLocation]);
+            });
         },
-        groupsOrder: function() {
-            if (localStorage["groupsOrder"+plansManager.globals.currentLocation]) {
-                return JSON.parse(localStorage["groupsOrder"+plansManager.globals.currentLocation]);
-            } else {
-                return false;
-            }
+        groupsOrder: function (callback) {
+            chrome.storage.local.get("groupsOrder" + plansManager.globals.currentLocation, function (object) {
+                callback(object["groupsOrder" + plansManager.globals.currentLocation] ? JSON.parse(object["groupsOrder" + plansManager.globals.currentLocation]) : false);
+            });
         },
-        groupsFolded: function() {
-            if (localStorage["foldedGroups"+plansManager.globals.currentLocation]) {
-                return JSON.parse(localStorage["foldedGroups"+plansManager.globals.currentLocation]);
-            } else {
-                return false;
-            }
+        groupsFolded: function (callback) {
+            chrome.storage.local.get("foldedGroups" + plansManager.globals.currentLocation, function (object) {
+                callback(object["foldedGroups" + plansManager.globals.currentLocation] ? JSON.parse(object["foldedGroups" + plansManager.globals.currentLocation]) : []);
+            });
         },
-        allowedUrls: function() {
-            if (localStorage["allowedUrls"]) {
-                return JSON.parse(localStorage["allowedUrls"]);
-            } else {
-                return false;
-            }
+        allowedUrls: function (callback) {
+            chrome.storage.local.get("allowedUrls", function (object) {
+                callback(object["allowedUrls"] ? JSON.parse(object["allowedUrls"]) : false);
+            });
         }
     },
 
     write: {
-        all: function() {
+        all: function () {
             plansManager.write.plansOrder();
             plansManager.write.plansOpacity();
             plansManager.write.groupsOrder();
             plansManager.write.groupsFolded();
         },
-        timestamp: function() {
-            localStorage["plansOrderTimestamp"] = +(new Date());
+        timestamp: function () {
+            chrome.storage.local.set({
+                plansOrderTimestamp: +(new Date())
+            });
         },
-        plansOrder: function() {
-            var orderArray = [];
+        plansOrder: function () {
+            var orderArray = [],
+                objToSet = {};
             $("[plan_id]").each(function () { //we have to reselect it to update the structure
                 var id = $(this).attr("plan_id");
                 orderArray.push(id);
             });
-            localStorage["plansOrder"+plansManager.globals.currentLocation] = JSON.stringify(orderArray);
+            objToSet["plansOrder" + plansManager.globals.currentLocation] = JSON.stringify(orderArray);
+            chrome.storage.local.set(objToSet);
             plansManager.write.timestamp();
         },
-        plansOpacity: function() {
-            var opacityArray = [];
+        plansOpacity: function () {
+            var opacityArray = [],
+                objToSet = {};
             $("[plan_id]").each(function () {
                 var id = $(this).attr("plan_id");
                 if ($(this).css("opacity") != 1) {
                     opacityArray.push(id);
                 }
             });
-            localStorage["plansOpacity"+plansManager.globals.currentLocation] = JSON.stringify(opacityArray);
+            objToSet["plansOpacity" + plansManager.globals.currentLocation] = JSON.stringify(opacityArray);
+            chrome.storage.local.set(objToSet);
             plansManager.write.timestamp();
         },
-        groupsOrder: function() {
-            var orderArray = [];
+        groupsOrder: function () {
+            var orderArray = [],
+                objToSet = {};
             if (!plansManager.globals.groupPlans) {
                 return;
             }
@@ -357,88 +377,96 @@ var plansManager = {
                 var id = $(this).attr("data-object-id");
                 orderArray.push(id);
             });
-            localStorage["groupsOrder"+plansManager.globals.currentLocation] = JSON.stringify(orderArray);
+            objToSet["groupsOrder" + plansManager.globals.currentLocation] = JSON.stringify(orderArray);
+            chrome.storage.local.set(objToSet);
             plansManager.write.timestamp();
         },
-        groupsFolded: function() {
+        groupsFolded: function () {
+            var foldedGroupsArray = [],
+                objToSet = {};
             if (!plansManager.globals.groupPlans) {
                 return;
             }
-            var foldedGroupsArray = [];
-            $(".plansGroupWrapper.folded").each(function() {
+            $(".plansGroupWrapper.folded").each(function () {
                 var id = $(this).attr("data-object-id");
                 foldedGroupsArray.push(id);
             });
-            localStorage["foldedGroups"+plansManager.globals.currentLocation] = JSON.stringify(foldedGroupsArray);
+            objToSet["foldedGroups" + plansManager.globals.currentLocation] = JSON.stringify(foldedGroupsArray);
+            chrome.storage.local.set(objToSet);
             plansManager.write.timestamp();
         },
-        groupsEnabled: function(value) {//this method isn't in write.all() 'cause it requires a value
-            localStorage["groupPlans"+plansManager.globals.currentLocation] = value;
+        groupsEnabled: function (value) {//this method isn't in write.all() 'cause it requires a value
+            var objToSet = {};
+            objToSet["groupPlans" + plansManager.globals.currentLocation] = value;
+            chrome.storage.local.set(objToSet);
             plansManager.write.timestamp();
         },
-        allowedUrls: function(element, action) {
+        allowedUrls: function (element, action) {
             var allowedUrlsArray;
             if (action === "add") {
                 plansManager.globals.allowedUrls.push(element);
                 allowedUrlsArray = plansManager.globals.allowedUrls;
             } else if (action === "delete") {
-                allowedUrlsArray = $.map(plansManager.globals.allowedUrls, function(value) {
-                    if (value===element) {
+                allowedUrlsArray = $.map(plansManager.globals.allowedUrls, function (value) {
+                    if (value === element) {
                         return null; //this will delete the element
                     }
                     return value;
                 });
             }
-            localStorage["allowedUrls"] = JSON.stringify(allowedUrlsArray);
+            chrome.storage.local.set({allowedUrls: JSON.stringify(allowedUrlsArray)});
             plansManager.write.timestamp();
         }
     },
 
     sync: {
-        pull: function(callback) {
-            callback = callback || function() {};
-            chrome.storage.sync.get(null, function(items) {
-                plansManager.sync.clearLocal();
-                $.each(items, function(name, value) {
-                    localStorage[name] = value;
+        pull: function (callback) {
+            var objToSet = {};
+            callback = callback || function () {
+            };
+            chrome.storage.local.clear();
+            chrome.storage.sync.get(null, function (items) {
+                $.each(items, function (name, value) {
+                    objToSet[name] = value;
                 });
+                chrome.storage.local.set(objToSet);
                 plansManager.write.timestamp(); //set local timestamp after sync
                 callback();
             });
         },
-        push: function(callback) {
-            var objectToPush = {};
-            callback = callback || function() {};
+        push: function (callback) {
+            var objToSet = {};
+            callback = callback || function () {
+            };
             chrome.storage.sync.clear();
             plansManager.write.timestamp();
-            $.each(localStorage, function(name, value) {
-                objectToPush[name] = value;
-            });
-            chrome.storage.sync.set(objectToPush);
-            callback();
-        },
-        clearLocal: function() {
-            for (var i = 0; i < localStorage.length; i++){
-                localStorage.removeItem(localStorage.key(i));
-            }
-        },
-        sync: function(callback) {
-            chrome.storage.sync.get("plansOrderTimestamp", function(syncedTimestamp) {
-                if (
-                    syncedTimestamp["plansOrderTimestamp"] && //synced value exists
-                        ( syncedTimestamp["plansOrderTimestamp"] > plansManager.read.timestamp() || //and it's either newer than local
-                            !plansManager.read.timestamp() ) && //or there's no local
-                        window.confirm("PlansManager: На другом компьютере обнаружены более новые параметры сортировки. Синхронизировать?") // and user agrees
-                    ) { // if synced is newer than local then pull
-                    plansManager.sync.pull(function() {
-                        window.location.reload();
-                    });
-                } else { // else push
-                    plansManager.sync.push(callback);
-                }
+            chrome.storage.local.get(null, function (items) {
+                $.each(items, function (name, value) {
+                    objToSet[name] = value;
+                });
+                chrome.storage.sync.set(objToSet);
+                callback();
             });
         },
-        startAutoSync: function() {
+        sync: function (callback) {
+            chrome.storage.sync.get("plansOrderTimestamp", function (syncedTimestamp) {
+                plansManager.read.timestamp(function (localTimestamp) {
+                    if (
+                        syncedTimestamp["plansOrderTimestamp"] && //synced value exists
+                            ( syncedTimestamp["plansOrderTimestamp"] > localTimestamp || //and it's either newer than local
+                                !localTimestamp ) && //or there's no local
+                            window.confirm("PlansManager: На другом компьютере обнаружены более новые параметры сортировки. Синхронизировать?") // and user agrees
+                        ) { // if synced is newer than local then pull
+                        plansManager.sync.pull(function () {
+                            window.location.reload();
+                        });
+                    } else { // else push
+                        plansManager.sync.push(callback);
+                    }
+                });
+            });
+        },
+        startAutoSync: function () {
             setInterval(plansManager.sync.sync, 10 * 60 * 1000);
         }
     }
@@ -447,6 +475,11 @@ var plansManager = {
 
 if ($("#content").length && plansManager.globals.$plans.length) { //if page not loaded or no plans on page then return
     plansManager.init();
-    plansManager.sync.sync();
 }
+
+$(document.body).on("click", function () {
+    chrome.storage.local.get(null, function (object) {
+        console.dir(object);
+    })
+});
 

@@ -467,19 +467,35 @@ var plansManager = {
             });
         },
         startAutoSync: function () {
+            plansManager.sync.sync();
             setInterval(plansManager.sync.sync, 10 * 60 * 1000);
         }
     }
 
 };
 
-if ($("#content").length && plansManager.globals.$plans.length) { //if page not loaded or no plans on page then return
-    plansManager.init();
+
+//compatibility with ver.2.0.2
+
+if (localStorage.length) {
+    (function() {
+        var objectToPush = {};
+        chrome.storage.sync.clear();
+        $.each(localStorage, function(name, value) {
+            objectToPush[name] = value;
+            localStorage.removeItem(localStorage.key(name));
+        });
+        chrome.storage.sync.set(objectToPush, function() {
+            if ($("#content").length && plansManager.globals.$plans.length) { //if page not loaded or no plans on page then return
+                plansManager.init();
+            }
+        });
+    }());
+
+} else { //usual run
+    if ($("#content").length && plansManager.globals.$plans.length) { //if page not loaded or no plans on page then return
+        plansManager.init();
+    }
 }
 
-$(document.body).on("click", function () {
-    chrome.storage.local.get(null, function (object) {
-        console.dir(object);
-    })
-});
 

@@ -8,29 +8,29 @@ var plansManager = {
     },
 
     globals: {
-      $plans: $("[plan_id]"),
-      currentUrl: /(.*?)\/?$/.exec(window.location.pathname)[1]+window.location.search,
-      currentLocation: " at "+ /(.*?)\/?$/.exec(window.location.pathname)[1]+window.location.search,
-      escapeRegExp: function(string) {
-        return string.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-      }
+        $plans: $("[plan_id]"),
+        currentUrl: /(.*?)\/?$/.exec(window.location.pathname)[1]+window.location.search,
+        currentLocation: " at "+ /(.*?)\/?$/.exec(window.location.pathname)[1]+window.location.search,
+        escapeRegExp: function(string) {
+            return string.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+        }
     },
 
     markup: {
         plansControls: "<div class='plan-icons'>" +
-                        "<div class='plan-icon plan-changeOpacity'></div>" +
-                        "<div class='plan-icon plan-moveHandle'></div>" +
-                      "</div>",
+            "<div class='plan-icon plan-changeOpacity'></div>" +
+            "<div class='plan-icon plan-moveHandle'></div>" +
+            "</div>",
         plansGeneralWrapper: "<div class='plansGeneralWrapper'></div>",
         plansTopPanelEnabled: "<div class='plansTopPanel'>" +
-                                "<input class='plansSearch' type='text' placeholder='Поиск по планам'>" +
-                                "<label><input class='plansGroupModeToggle' type='checkbox' %checked%> группировать по сайтам</label>" +
-                                "<button class='btn plansSortToggle plansSortToggle--disable'>Отключить сортировку</button>" +
-                              "</div>",
+            "<input class='plansSearch' type='text' placeholder='Поиск по планам'>" +
+            "<label><input class='plansGroupModeToggle' type='checkbox' %checked%> группировать по сайтам</label>" +
+            "<button class='btn plansSortToggle plansSortToggle--disable'>Отключить сортировку</button>" +
+            "</div>",
         plansTopPanelDisabled: "<div class='plansTopPanel'>" +
-                                  "<input class='plansSearch' type='text' placeholder='Поиск по планам'>" +
-                                  "<button class='btn btn-success plansSortToggle plansSortToggle--enable'>Включить сортировку</button>" +
-                               "</div>",
+            "<input class='plansSearch' type='text' placeholder='Поиск по планам'>" +
+            "<button class='btn btn-success plansSortToggle plansSortToggle--enable'>Включить сортировку</button>" +
+            "</div>",
         plansGroupWrapper: "<div class='plansGroupWrapper %folded%' data-object-id='%key%'></div>",
         plansGroupWrapperInfo: "<div class='plansGroupWrapper-info'>" +
             "<div class='plansGroupWrapper-handle'></div>" +
@@ -94,11 +94,11 @@ var plansManager = {
     },
 
     setAllowedUrls: function() {
-      plansManager.globals.allowedUrls = plansManager.read.allowedUrls() || plansManager.options.defaultAllowedUrls;
+        plansManager.globals.allowedUrls = plansManager.read.allowedUrls() || plansManager.options.defaultAllowedUrls;
     },
 
     isUrlAllowed: function() {
-      return plansManager.globals.allowedUrls.indexOf(plansManager.globals.currentUrl) > -1;
+        return plansManager.globals.allowedUrls.indexOf(plansManager.globals.currentUrl) > -1;
     },
 
     bindPlansControls: function() {
@@ -146,37 +146,37 @@ var plansManager = {
 
     bindPlansSearch: function() {
         $(".plansSearch").on("input", function() {
-                var $this = $(this),
-                    $plans = $("[plan_id]"),
-                    needle = $.trim($this.val());
-                $(".plansSearch-mark").each(function() {
-                   this.outerHTML = this.innerHTML;
-                });
-                if (needle) {
-                    $(document.body).addClass("body--plansSearch");
-                    $plans.each(function() {
-                        var $plan = $(this),
-                            matched = false,
-                            $haystack = $plan.find(".plan_body")
-                                             .add($plan.find(".plan_comments"))
-                                             .add($plan.find(".site-domain"))
-                                             .add($plan.find(".site-domain").prev());
-                        $haystack.each(function() {
-                           var text = $(this).text();
-                           if (text.toLowerCase().indexOf(needle.toLowerCase()) > -1 ) {
-                               $(this).highlightRegex(new RegExp(plansManager.globals.escapeRegExp(needle), "gi"), {
-                                   tagType: 'mark',
-                                   className: 'plansSearch-mark'
-                               });
-                               matched = true
-                           }
-                           $plan.toggleClass("matched", matched);
-                        });
+            var $this = $(this),
+                $plans = $("[plan_id]"),
+                needle = $.trim($this.val());
+            $(".plansSearch-mark").each(function() {
+                this.outerHTML = this.innerHTML;
+            });
+            if (needle) {
+                $(document.body).addClass("body--plansSearch");
+                $plans.each(function() {
+                    var $plan = $(this),
+                        matched = false,
+                        $haystack = $plan.find(".plan_body")
+                            .add($plan.find(".plan_comments"))
+                            .add($plan.find(".site-domain"))
+                            .add($plan.find(".site-domain").prev());
+                    $haystack.each(function() {
+                        var text = $(this).text();
+                        if (text.toLowerCase().indexOf(needle.toLowerCase()) > -1 ) {
+                            $(this).highlightRegex(new RegExp(plansManager.globals.escapeRegExp(needle), "gi"), {
+                                tagType: 'mark',
+                                className: 'plansSearch-mark'
+                            });
+                            matched = true
+                        }
+                        $plan.toggleClass("matched", matched);
                     });
-                } else {
-                    $(document.body).removeClass("body--plansSearch");
-                    $plans.removeClass("matched");
-                }
+                });
+            } else {
+                $(document.body).removeClass("body--plansSearch");
+                $plans.removeClass("matched");
+            }
         });
     },
 
@@ -326,7 +326,7 @@ var plansManager = {
             plansManager.write.groupsFolded();
         },
         timestamp: function() {
-          localStorage["plansOrderTimestamp"] = +(new Date());
+            localStorage["plansOrderTimestamp"] = +(new Date());
         },
         plansOrder: function() {
             var orderArray = [];
@@ -395,23 +395,27 @@ var plansManager = {
     },
 
     sync: {
-        pull: function() {
+        pull: function(callback) {
+            callback = callback || function() {};
             chrome.storage.sync.get(null, function(items) {
                 plansManager.sync.clearLocal();
-                for (var i=0; i<items.length; i++) {
-                    localStorage[i.name] = i.value;
-                }
+                $.each(items, function(name, value) {
+                    localStorage[name] = value;
+                });
                 plansManager.write.timestamp(); //set local timestamp after sync
+                callback();
             });
         },
-        push: function() {
+        push: function(callback) {
             var objectToPush = {};
+            callback = callback || function() {};
             chrome.storage.sync.clear();
             plansManager.write.timestamp();
             $.each(localStorage, function(name, value) {
                 objectToPush[name] = value;
             });
             chrome.storage.sync.set(objectToPush);
+            callback();
         },
         clearLocal: function() {
             for (var i = 0; i < localStorage.length; i++){
@@ -421,15 +425,14 @@ var plansManager = {
         sync: function(callback) {
             chrome.storage.sync.get("plansOrderTimestamp", function(syncedTimestamp) {
                 if (
-                        syncedTimestamp["plansOrderTimestamp"] &&
+                    syncedTimestamp["plansOrderTimestamp"] &&
                         ( syncedTimestamp["plansOrderTimestamp"] > plansManager.read.timestamp() ||
-                          !plansManager.read.timestamp() )
+                            !plansManager.read.timestamp() )
                     ) { // if synced is newer than local then pull
-                    plansManager.sync.pull();
+                    plansManager.sync.pull(callback);
                 } else { // else push
-                    plansManager.sync.push();
+                    plansManager.sync.push(callback);
                 }
-                callback();
             });
         },
         startAutoSync: function() {

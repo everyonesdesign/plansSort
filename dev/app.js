@@ -421,31 +421,21 @@ var plansManager = {
 
     sync: {
         pull: function (callback) {
-            var objToSet = {};
-            callback = callback || function () {
-            };
+            callback = callback || function () {};
             chrome.storage.local.clear();
             chrome.storage.sync.get(null, function (items) {
-                $.each(items, function (name, value) {
-                    objToSet[name] = value;
+                chrome.storage.local.set(items, function() {
+                    plansManager.write.timestamp(); //set local timestamp after sync
+                    callback();
                 });
-                chrome.storage.local.set(objToSet);
-                plansManager.write.timestamp(); //set local timestamp after sync
-                callback();
             });
         },
         push: function (callback) {
-            var objToSet = {};
-            callback = callback || function () {
-            };
+            callback = callback || function () {};
             chrome.storage.sync.clear();
             plansManager.write.timestamp();
             chrome.storage.local.get(null, function (items) {
-                $.each(items, function (name, value) {
-                    objToSet[name] = value;
-                });
-                chrome.storage.sync.set(objToSet);
-                callback();
+                chrome.storage.sync.set(items, callback);
             });
         },
         sync: function (callback) {

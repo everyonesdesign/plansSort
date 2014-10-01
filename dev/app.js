@@ -454,8 +454,8 @@ var plansManager = {
                     if (
                         syncedTimestamp["plansOrderTimestamp"] && //synced value exists
                             ( syncedTimestamp["plansOrderTimestamp"] > localTimestamp || //and it's either newer than local
-                                !localTimestamp ) && //or there's no local
-                            window.confirm("PlansManager: На другом компьютере обнаружены более новые параметры сортировки. Синхронизировать?") // and user agrees
+                                !localTimestamp ) //or there's no local
+                            // && window.confirm("PlansManager: На другом компьютере обнаружены более новые параметры сортировки. Синхронизировать?") // and user agrees
                         ) { // if synced is newer than local then pull
                         plansManager.sync.pull(function () {
                             window.location.reload();
@@ -468,7 +468,7 @@ var plansManager = {
         },
         startAutoSync: function () {
             plansManager.sync.sync();
-            setInterval(plansManager.sync.sync, 10 * 60 * 1000);
+            setInterval(plansManager.sync.sync, 30 * 60 * 1000);
         }
     }
 

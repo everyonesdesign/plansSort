@@ -23,6 +23,7 @@ var plansManager = {
             "</div>",
         plansGeneralWrapper: "<div class='plansGeneralWrapper'></div>",
         plansTopPanelEnabled: "<div class='plansTopPanel'>" +
+            "%sync%" +
             "<input class='plansSearch' type='text' placeholder='Поиск по планам'>" +
             "<label><input class='plansGroupModeToggle' type='checkbox' %checked%> группировать по сайтам</label>" +
             "<button class='btn plansSortToggle plansSortToggle--disable'>Отключить сортировку</button>" +
@@ -38,6 +39,20 @@ var plansManager = {
             "<span class='domainName'><a href='http://%domain%'>%domain%</a></span>" +
             "<span>Количество планов: %number%</span>" +
             "<span class='plansGroupToggle'><a href='javascript:;'>Свернуть/развернуть</a></span>" +
+            "</div>",
+        plansSyncMenu: "<div class='btn-group plansSync'>" +
+            "<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>" +
+            "Синхронизация&nbsp;" +
+            "<span class='caret'></span>" +
+            "</a>" +
+            "<ul class='dropdown-menu'>" +
+            "<li><a href='#' class='plansSync-save'>Сохранить порядок планов</a></li>" +
+            "<li><a href='#' class='plansSync-load'>Загрузить порядок планов</a></li>" +
+            "<li><a href='#' class='plansSync-autoSync'>Автосинхронизация</a></li>" +
+            "<li class='divider'></li>" +
+            "<li><a href='#' class='plansSync-status'>Статус планов</a></li>" +
+            "<li><a href='#' class='plansSync-about'>Что это?</a></li>" +
+            "</ul>" +
             "</div>"
     },
 
@@ -51,7 +66,6 @@ var plansManager = {
 
                 plansManager.sync.startAutoSync();
 
-
                 if (plansManager.isUrlAllowed()) {
 
                     //bootstrap
@@ -62,6 +76,7 @@ var plansManager = {
                     plansManager.bindGroupModeToggle();
                     plansManager.bindSortToggle();
                     plansManager.bindPlansSearch();
+                    plansManager.bindPlansSync();
 
                     if (plansManager.globals.groupPlans) {
                         plansManager.initPlansGrouped();
@@ -94,7 +109,9 @@ var plansManager = {
             .append(plansManager.markup.plansControls)
             .wrapAll(plansManager.markup.plansGeneralWrapper);
 
-        $(".plansGeneralWrapper").before(plansManager.markup.plansTopPanelEnabled.replace("%checked%", checked));
+        $(".plansGeneralWrapper").before(
+            plansManager.markup.plansTopPanelEnabled.replace("%checked%", checked).replace("%sync%", plansManager.markup.plansSyncMenu)
+        );
     },
 
     bootstrapUnallowedUrl: function () {
@@ -111,6 +128,37 @@ var plansManager = {
 
     isUrlAllowed: function () {
         return plansManager.globals.allowedUrls.indexOf(plansManager.globals.currentUrl) > -1;
+    },
+
+    bindPlansSync: function () {
+        $(".plansSync-save").click(function () {
+            plansManager.sync.push(function () {
+                var $alert = $("<div class='alert alert-success'>Порядок планов сохранен</div>");
+                $(".plansTopPanel").prepend($alert);
+                setTimeout(function() {
+                    $alert.remove();
+                }, 5000);
+            });
+        });
+        $(".plansSync-load").click(function () {
+            plansManager.sync.pull(function () {
+                window.location.reload();
+            });
+        });
+        plansManager.read.autosync(function(autosync) {
+            var newAutosyncValue;
+            $autosync = $(".plansSync-autosync");
+            console.log($autosync.length)
+            debugger;
+            if (autosync) {
+                $autosync.prepend("<i class='icon-ok'></i>");
+            }
+            $autosync.click(function () {
+                newAutosyncValue = autosync ? 0 : 1;
+                plansManager.write.autosync(newAutosyncValue);
+            });
+        });
+
     },
 
     bindPlansControls: function () {
@@ -328,6 +376,12 @@ var plansManager = {
             chrome.storage.local.get("allowedUrls", function (object) {
                 callback(object["allowedUrls"] ? JSON.parse(object["allowedUrls"]) : false);
             });
+        },
+        autosync: function (callback) {
+            chrome.storage.local.get("autosync", function (object) {
+                var autosyncValue = object["autosync"] == 1 ? 1 : 0;
+                callback(autosyncValue);
+            });
         }
     },
 
@@ -416,43 +470,56 @@ var plansManager = {
             }
             chrome.storage.local.set({allowedUrls: JSON.stringify(allowedUrlsArray)});
             plansManager.write.timestamp();
+        },
+        autosync: function (value) {//this method isn't in write.all() 'cause it requires a value
+            chrome.storage.local.set({
+                "autosync": value
+            });
         }
     },
 
     sync: {
         pull: function (callback) {
-            callback = callback || function () {};
+            callback = callback || function () {
+            };
             chrome.storage.local.clear();
             chrome.storage.sync.get(null, function (items) {
-                chrome.storage.local.set(items, function() {
+                chrome.storage.local.set(items, function () {
+                    delete items.autosync;
                     plansManager.write.timestamp(); //set local timestamp after sync
                     callback();
                 });
             });
         },
         push: function (callback) {
-            callback = callback || function () {};
+            callback = callback || function () {
+            };
             chrome.storage.sync.clear();
             plansManager.write.timestamp();
             chrome.storage.local.get(null, function (items) {
+                delete items.autosync;
                 chrome.storage.sync.set(items, callback);
             });
         },
         sync: function (callback) {
-            chrome.storage.sync.get("plansOrderTimestamp", function (syncedTimestamp) {
-                plansManager.read.timestamp(function (localTimestamp) {
-                    if (
-                        syncedTimestamp["plansOrderTimestamp"] && //synced value exists
-                            ( syncedTimestamp["plansOrderTimestamp"] > localTimestamp || //and it's either newer than local
-                                !localTimestamp ) //or there's no local
-                            // && window.confirm("PlansManager: На другом компьютере обнаружены более новые параметры сортировки. Синхронизировать?") // and user agrees
-                        ) { // if synced is newer than local then pull
-                        plansManager.sync.pull(function () {
-                            window.location.reload();
-                        });
-                    } else { // else push
-                        plansManager.sync.push(callback);
-                    }
+            plansManager.read.autosync(function (autosync) {
+                if (!autosync) {
+                    return
+                }
+                chrome.storage.sync.get("plansOrderTimestamp", function (syncedTimestamp) {
+                    plansManager.read.timestamp(function (localTimestamp) {
+                        if (
+                            syncedTimestamp["plansOrderTimestamp"] && //synced value exists
+                                ( syncedTimestamp["plansOrderTimestamp"] > localTimestamp || //and it's either newer than local
+                                    !localTimestamp ) //or there's no local
+                            ) { // if synced is newer than local then pull
+                            plansManager.sync.pull(function () {
+                                window.location.reload();
+                            });
+                        } else { // else push
+                            plansManager.sync.push(callback);
+                        }
+                    });
                 });
             });
         },

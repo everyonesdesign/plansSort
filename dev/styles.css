@@ -126,6 +126,10 @@ div[plan_id]:hover .plan-icons {
     margin: -33px 0 -15px;
 }
 
+.plansTopPanel .alert {
+    text-align: left;
+}
+
 .plansTopPanel label {
     display: inline;
     margin: 0 10px;
@@ -140,4 +144,10 @@ div[plan_id]:hover .plan-icons {
 .plansTopPanel input[type="text"] {
     margin: 0 10px;
 }
+
+.plansSync {
+    display: inline-block;
+    text-align: left;
+}
+
 

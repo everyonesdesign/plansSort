@@ -48,7 +48,7 @@ var plansManager = {
             "<ul class='dropdown-menu'>" +
             "<li><a href='#' class='plansSync-save'>Сохранить порядок планов</a></li>" +
             "<li><a href='#' class='plansSync-load'>Загрузить порядок планов</a></li>" +
-            "<li><a href='#' class='plansSync-autoSync'>Автосинхронизация</a></li>" +
+            "<li><a href='#' class='plansSync-autosync'>Автосинхронизация</a></li>" +
             "<li class='divider'></li>" +
             "<li><a href='#' class='plansSync-status'>Статус планов</a></li>" +
             "<li><a href='#' class='plansSync-about'>Что это?</a></li>" +
@@ -146,17 +146,23 @@ var plansManager = {
             });
         });
         plansManager.read.autosync(function(autosync) {
-            var newAutosyncValue;
             $autosync = $(".plansSync-autosync");
-            console.log($autosync.length)
-            debugger;
-            if (autosync) {
-                $autosync.prepend("<i class='icon-ok'></i>");
-            }
+            bootstrapButtonIcon(autosync);
             $autosync.click(function () {
-                newAutosyncValue = autosync ? 0 : 1;
-                plansManager.write.autosync(newAutosyncValue);
+                plansManager.read.autosync(function(autosync) {
+                    var newAutosyncValue = autosync ? 0 : 1;
+                    bootstrapButtonIcon(newAutosyncValue);
+                    plansManager.write.autosync(newAutosyncValue);
+                });
             });
+            function bootstrapButtonIcon(bool) {
+                var iconClass = "icon-ok-circle";
+                if (bool) {
+                    $autosync.prepend("<i class='" + iconClass + "'></i>");
+                } else {
+                    $autosync.find("." + iconClass).remove();
+                }
+            }
         });
 
     },

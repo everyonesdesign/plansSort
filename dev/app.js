@@ -53,6 +53,13 @@ var plansManager = {
             "<li><a href='#' class='plansSync-status'>Статус планов</a></li>" +
             "<li><a href='#' class='plansSync-about'>Что это?</a></li>" +
             "</ul>" +
+            "</div>",
+        modal: "<div class='modal hide fade' style='display: none' id='plansModal'>" +
+                "<div class='modal-header'>" +
+                    "<button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>" +
+                    "<h3 class='modal-title'></h3>" +
+                "</div>" +
+                "<div class='modal-body'></div>" +
             "</div>"
     },
 
@@ -74,9 +81,6 @@ var plansManager = {
                     //bindings
                     plansManager.bindPlansControls();
                     plansManager.bindGroupModeToggle();
-                    plansManager.bindSortToggle();
-                    plansManager.bindPlansSearch();
-                    plansManager.bindPlansSync();
 
                     if (plansManager.globals.groupPlans) {
                         plansManager.initPlansGrouped();
@@ -90,10 +94,13 @@ var plansManager = {
                 } else {
 
                     plansManager.bootstrapUnallowedUrl();
-                    plansManager.bindSortToggle();
-                    plansManager.bindPlansSearch();
 
                 }
+
+                plansManager.bindSortToggle();
+                plansManager.bindPlansSearch();
+                plansManager.bindPlansSync();
+                plansManager.bootstrapModal();
 
             });
 
@@ -119,6 +126,10 @@ var plansManager = {
         $(".attach_call_container").after(plansManager.markup.plansTopPanelDisabled);
     },
 
+    bootstrapModal: function() {
+        $(document.body).append(plansManager.markup.modal);
+    },
+
     setAllowedUrls: function (callback) {
         plansManager.read.allowedUrls(function (obj) {
             plansManager.globals.allowedUrls = obj || plansManager.options.defaultAllowedUrls;
@@ -133,11 +144,7 @@ var plansManager = {
     bindPlansSync: function () {
         $(".plansSync-save").click(function () {
             plansManager.sync.push(function () {
-                var $alert = $("<div class='alert alert-success'>Порядок планов сохранен</div>");
-                $(".plansTopPanel").prepend($alert);
-                setTimeout(function() {
-                    $alert.remove();
-                }, 5000);
+                plansManager.pushMsg("Порядок планов сохранен", "alert-success");
             });
         });
         $(".plansSync-load").click(function () {
@@ -163,6 +170,30 @@ var plansManager = {
                     $autosync.find("." + iconClass).remove();
                 }
             }
+        });
+
+        $(".plansSync-status").click(function () {
+            var title = "Статус синхронизации сортировки",
+                body = "<p>Дата последнего локального изменения: %local%</p>" +
+                       "<p>Дата последнего удаленного изменения: %synced%</p>";
+            chrome.storage.sync.get("plansOrderTimestamp", function (syncedTimestamp) {
+                plansManager.read.timestamp(function (localTimestamp) {
+                    var localDate = localTimestamp ? new Date(localTimestamp).toLocaleString() : "Отсутствует",
+                        syncedDate = syncedTimestamp["plansOrderTimestamp"] ? new Date(syncedTimestamp["plansOrderTimestamp"]).toLocaleString() : "Отсутствует";
+                    body = body.replace("%local%", localDate).replace("%synced%", syncedDate);
+                    plansManager.showModal(title, body);
+                });
+            });
+        });
+
+        $(".plansSync-about").click(function () {
+            var title = "О синхронизации планов",
+                body = "<p>Данное меню позволяет сохранять/загружать состояние сортировки планов для аккаунта Google.</p>" +
+                       "<p><b>Сохранить порядок планов</b> - сохранить локальное расположение планов в хранилище аккаунта Google.</p>" +
+                       "<p><b>Загрузить порядок планов</b> - загрузить локальное расположение планов из хранилища аккаунта Google.</p>" +
+                       "<p><b>Автосинхронизация</b> - проводить каждые 30 минут синхронизацию с хранилищем аккаунта и, если найдено более новое состояние, применить его.</p>" +
+                       "<p><b>Статус планов</b> - посмотреть даты последнего изменения локального/удаленного расположения планов.</p>";
+            plansManager.showModal(title, body);
         });
 
     },
@@ -244,6 +275,23 @@ var plansManager = {
                 $plans.removeClass("matched");
             }
         });
+    },
+
+    showModal: function(title, body) {
+        var $modal = $('#plansModal');
+        $modal.find(".modal-title").text(title);
+        $modal.find(".modal-body").html(body);
+        $modal.modal();
+    },
+    
+    pushMsg: function(body, className, single) {
+        //TODO: move to markup
+        var $alert = $("<div class='alert plansAlert" + single ? single : "" +  " " + className + "'>"
+                + body +
+            "<button type='button' class='close' data-dismiss='alert'>×</button></div>");
+        if (!(single && !$(".plansAlert" + single).length)) {
+            $(".plansTopPanel").prepend($alert);
+        }
     },
 
     makeSortable: function ($obj) {
@@ -355,7 +403,7 @@ var plansManager = {
         },
         timestamp: function (callback) {
             chrome.storage.local.get("plansOrderTimestamp", function (object) {
-                callback(+object["plansOrderTimestamp"] || false);
+                callback(+(object["plansOrderTimestamp"]) || false);
             });
         },
         plansOpacity: function (callback) {
@@ -507,24 +555,28 @@ var plansManager = {
                 chrome.storage.sync.set(items, callback);
             });
         },
-        sync: function (callback) {
+        sync: function () {
             plansManager.read.autosync(function (autosync) {
                 if (!autosync) {
                     return
                 }
                 chrome.storage.sync.get("plansOrderTimestamp", function (syncedTimestamp) {
                     plansManager.read.timestamp(function (localTimestamp) {
-                        if (
-                            syncedTimestamp["plansOrderTimestamp"] && //synced value exists
-                                ( syncedTimestamp["plansOrderTimestamp"] > localTimestamp || //and it's either newer than local
-                                    !localTimestamp ) //or there's no local
-                            ) { // if synced is newer than local then pull
-                            plansManager.sync.pull(function () {
-                                window.location.reload();
-                            });
-                        } else { // else push
-                            plansManager.sync.push(callback);
-                        }
+                        plansManager.read.autosync(function(autosync) {
+                            if (
+                                syncedTimestamp["plansOrderTimestamp"] && //synced value exists
+                                    ( (syncedTimestamp["plansOrderTimestamp"] > localTimestamp || //and it's either newer than local
+                                        !localTimestamp ) && //or there's no local
+                                            autosync  ) //and autosync is toggled on
+                                ) { // if synced is newer than local then pull and reload page
+                                plansManager.sync.pull(function () {
+                                    plansManager.pushMsg("Обнаружен более новый порядок планов. " +
+                                        "Для применения необходимо обновить страницу " +
+                                    "<a href='javascript:window.location.reload()'>Обновить</a>.", "alert-info", 1);
+                                    window.location.reload();
+                                });
+                            }
+                        });
                     });
                 });
             });

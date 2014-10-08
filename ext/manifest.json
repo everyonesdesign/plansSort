@@ -21,6 +21,7 @@
         "js": [
             "jquery.min.js",
             "jquery-ui.min.js",
+            "bootstrap-modal.js",
             "highlightRegex.min.js",
             "app.min.js"
         ],

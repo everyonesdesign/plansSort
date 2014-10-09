@@ -60,7 +60,11 @@ var plansManager = {
             "<h3 class='modal-title'></h3>" +
             "</div>" +
             "<div class='modal-body'></div>" +
-            "</div>"
+            "</div>",
+        alert: "<div class='alert plansAlert%single% %className%'>"
+                    + "%body%" +
+                    "<button type='button' class='close' data-dismiss='alert'>×</button>" +
+                "</div>"
     },
 
     init: function () {
@@ -286,10 +290,11 @@ var plansManager = {
     },
 
     pushMsg: function (body, className, single) {
-        //TODO: move to markup
-        var $alert = $("<div class='alert plansAlert" + (single ? single : "") + " " + className + "'>"
-            + body +
-            "<button type='button' class='close' data-dismiss='alert'>×</button></div>");
+        var alertHTML = plansManager.markup.alert
+            .replace("%single%", single||"")
+            .replace("%className%", className)
+            .replace("%body%", body);
+        var $alert = $(alertHTML);
         if (!(single && !$(".plansAlert" + single).length)) {
             $(".plansTopPanel").prepend($alert);
         }

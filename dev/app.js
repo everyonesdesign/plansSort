@@ -587,7 +587,7 @@ var plansManager = {
         },
         startAutoSync: function () {
             plansManager.sync.sync();
-            setInterval(plansManager.sync.sync, 10000/*30 * 60 * 1000*/);
+            setInterval(plansManager.sync.sync, 30 * 60 * 1000);
         }
     }
 

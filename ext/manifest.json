@@ -3,7 +3,7 @@
 
   "name": "plansManager",
   "description": "Приложение для сортировки планов",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "icons": { 
     "16": "icon16.png",
     "48": "icon48.png",

@@ -55,11 +55,11 @@ var plansManager = {
             "</ul>" +
             "</div>",
         modal: "<div class='modal hide fade' style='display: none' id='plansModal'>" +
-                "<div class='modal-header'>" +
-                    "<button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>" +
-                    "<h3 class='modal-title'></h3>" +
-                "</div>" +
-                "<div class='modal-body'></div>" +
+            "<div class='modal-header'>" +
+            "<button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>" +
+            "<h3 class='modal-title'></h3>" +
+            "</div>" +
+            "<div class='modal-body'></div>" +
             "</div>"
     },
 
@@ -126,7 +126,7 @@ var plansManager = {
         $(".attach_call_container").after(plansManager.markup.plansTopPanelDisabled);
     },
 
-    bootstrapModal: function() {
+    bootstrapModal: function () {
         $(document.body).append(plansManager.markup.modal);
     },
 
@@ -152,11 +152,11 @@ var plansManager = {
                 window.location.reload();
             });
         });
-        plansManager.read.autosync(function(autosync) {
+        plansManager.read.autosync(function (autosync) {
             $autosync = $(".plansSync-autosync");
             bootstrapButtonIcon(autosync);
             $autosync.click(function () {
-                plansManager.read.autosync(function(autosync) {
+                plansManager.read.autosync(function (autosync) {
                     var newAutosyncValue = autosync ? 0 : 1;
                     bootstrapButtonIcon(newAutosyncValue);
                     plansManager.write.autosync(newAutosyncValue);
@@ -175,7 +175,7 @@ var plansManager = {
         $(".plansSync-status").click(function () {
             var title = "Статус синхронизации сортировки",
                 body = "<p>Дата последнего локального изменения: %local%</p>" +
-                       "<p>Дата последнего удаленного изменения: %synced%</p>";
+                    "<p>Дата последнего удаленного изменения: %synced%</p>";
             chrome.storage.sync.get("plansOrderTimestamp", function (syncedTimestamp) {
                 plansManager.read.timestamp(function (localTimestamp) {
                     var localDate = localTimestamp ? new Date(localTimestamp).toLocaleString() : "Отсутствует",
@@ -189,10 +189,11 @@ var plansManager = {
         $(".plansSync-about").click(function () {
             var title = "О синхронизации планов",
                 body = "<p>Данное меню позволяет сохранять/загружать состояние сортировки планов для аккаунта Google.</p>" +
-                       "<p><b>Сохранить порядок планов</b> - сохранить локальное расположение планов в хранилище аккаунта Google.</p>" +
-                       "<p><b>Загрузить порядок планов</b> - загрузить локальное расположение планов из хранилища аккаунта Google.</p>" +
-                       "<p><b>Автосинхронизация</b> - проводить каждые 30 минут синхронизацию с хранилищем аккаунта и, если найдено более новое состояние, применить его.</p>" +
-                       "<p><b>Статус планов</b> - посмотреть даты последнего изменения локального/удаленного расположения планов.</p>";
+                    "<p><b>Сохранить порядок планов</b> - сохранить локальное расположение планов в хранилище аккаунта Google.</p>" +
+                    "<p><b>Загрузить порядок планов</b> - загрузить локальное расположение планов из хранилища аккаунта Google.</p>" +
+                    "<p><b>Автосинхронизация</b> - проводить каждые 30 минут синхронизацию с хранилищем аккаунта и, " +
+                    "если найдено более новое состояние (после сохранения с другого компьютера), применить его.</p>" +
+                    "<p><b>Статус планов</b> - посмотреть даты последнего изменения локального/удаленного расположения планов.</p>";
             plansManager.showModal(title, body);
         });
 
@@ -277,17 +278,17 @@ var plansManager = {
         });
     },
 
-    showModal: function(title, body) {
+    showModal: function (title, body) {
         var $modal = $('#plansModal');
         $modal.find(".modal-title").text(title);
         $modal.find(".modal-body").html(body);
         $modal.modal();
     },
-    
-    pushMsg: function(body, className, single) {
+
+    pushMsg: function (body, className, single) {
         //TODO: move to markup
-        var $alert = $("<div class='alert plansAlert" + single ? single : "" +  " " + className + "'>"
-                + body +
+        var $alert = $("<div class='alert plansAlert" + (single ? single : "") + " " + className + "'>"
+            + body +
             "<button type='button' class='close' data-dismiss='alert'>×</button></div>");
         if (!(single && !$(".plansAlert" + single).length)) {
             $(".plansTopPanel").prepend($alert);
@@ -562,28 +563,26 @@ var plansManager = {
                 }
                 chrome.storage.sync.get("plansOrderTimestamp", function (syncedTimestamp) {
                     plansManager.read.timestamp(function (localTimestamp) {
-                        plansManager.read.autosync(function(autosync) {
-                            if (
-                                syncedTimestamp["plansOrderTimestamp"] && //synced value exists
-                                    ( (syncedTimestamp["plansOrderTimestamp"] > localTimestamp || //and it's either newer than local
-                                        !localTimestamp ) && //or there's no local
-                                            autosync  ) //and autosync is toggled on
-                                ) { // if synced is newer than local then pull and reload page
-                                plansManager.sync.pull(function () {
-                                    plansManager.pushMsg("Обнаружен более новый порядок планов. " +
-                                        "Для применения необходимо обновить страницу " +
+                        if (
+                            syncedTimestamp["plansOrderTimestamp"] && //synced value exists
+                                ( (syncedTimestamp["plansOrderTimestamp"] > localTimestamp || //and it's either newer than local
+                                    !localTimestamp ) && //or there's no local
+                                    autosync  ) //and autosync is toggled on
+                            ) { // if synced is newer than local then pull and reload page
+                            plansManager.sync.pull(function () {
+                                plansManager.pushMsg("Обнаружен более новый порядок планов. " +
+                                    "Для применения необходимо обновить страницу " +
                                     "<a href='javascript:window.location.reload()'>Обновить</a>.", "alert-info", 1);
-                                    window.location.reload();
-                                });
-                            }
-                        });
+                                window.location.reload();
+                            });
+                        }
                     });
                 });
             });
         },
         startAutoSync: function () {
             plansManager.sync.sync();
-            setInterval(plansManager.sync.sync, 30 * 60 * 1000);
+            setInterval(plansManager.sync.sync, 10000/*30 * 60 * 1000*/);
         }
     }
 

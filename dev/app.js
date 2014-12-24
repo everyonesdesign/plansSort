@@ -48,7 +48,6 @@ var plansManager = {
             "<ul class='dropdown-menu'>" +
             "<li><a href='#' class='plansSync-save'>Сохранить порядок планов</a></li>" +
             "<li><a href='#' class='plansSync-load'>Загрузить порядок планов</a></li>" +
-            "<li><a href='#' class='plansSync-autosync'>Автосинхронизация</a></li>" +
             "<li class='divider'></li>" +
             "<li><a href='#' class='plansSync-status'>Статус планов</a></li>" +
             "<li><a href='#' class='plansSync-about'>Что это?</a></li>" +
@@ -74,8 +73,6 @@ var plansManager = {
             plansManager.globals.groupPlans = obj;
 
             plansManager.setAllowedUrls(function () {
-
-                plansManager.sync.startAutoSync();
 
                 if (plansManager.isUrlAllowed()) {
 
@@ -153,27 +150,11 @@ var plansManager = {
         });
         $(".plansSync-load").click(function () {
             plansManager.sync.pull(function () {
-                window.location.reload();
+                plansManager.pushMsg("Порядок планов загружен, перезагрузка страницы...", "alert-success");
+                setTimeout(function() {
+                    window.location.reload();
+                }, 2000);
             });
-        });
-        plansManager.read.autosync(function (autosync) {
-            $autosync = $(".plansSync-autosync");
-            bootstrapButtonIcon(autosync);
-            $autosync.click(function () {
-                plansManager.read.autosync(function (autosync) {
-                    var newAutosyncValue = autosync ? 0 : 1;
-                    bootstrapButtonIcon(newAutosyncValue);
-                    plansManager.write.autosync(newAutosyncValue);
-                });
-            });
-            function bootstrapButtonIcon(bool) {
-                var iconClass = "icon-ok-circle";
-                if (bool) {
-                    $autosync.prepend("<i class='" + iconClass + "'></i>");
-                } else {
-                    $autosync.find("." + iconClass).remove();
-                }
-            }
         });
 
         $(".plansSync-status").click(function () {
@@ -195,8 +176,6 @@ var plansManager = {
                 body = "<p>Данное меню позволяет сохранять/загружать состояние сортировки планов для аккаунта Google.</p>" +
                     "<p><b>Сохранить порядок планов</b> - сохранить локальное расположение планов в хранилище аккаунта Google.</p>" +
                     "<p><b>Загрузить порядок планов</b> - загрузить локальное расположение планов из хранилища аккаунта Google.</p>" +
-                    "<p><b>Автосинхронизация</b> - проводить каждые 30 минут синхронизацию с хранилищем аккаунта и, " +
-                    "если найдено более новое состояние (после сохранения с другого компьютера), применить его.</p>" +
                     "<p><b>Статус планов</b> - посмотреть даты последнего изменения локального/удаленного расположения планов.</p>";
             plansManager.showModal(title, body);
         });
@@ -436,12 +415,6 @@ var plansManager = {
             chrome.storage.local.get("allowedUrls", function (object) {
                 callback(object["allowedUrls"] ? JSON.parse(object["allowedUrls"]) : false);
             });
-        },
-        autosync: function (callback) {
-            chrome.storage.local.get("autosync", function (object) {
-                var autosyncValue = object["autosync"] == 1 ? 1 : 0;
-                callback(autosyncValue);
-            });
         }
     },
 
@@ -530,11 +503,6 @@ var plansManager = {
             }
             chrome.storage.local.set({allowedUrls: JSON.stringify(allowedUrlsArray)});
             plansManager.write.timestamp();
-        },
-        autosync: function (value) {//this method isn't in write.all() 'cause it requires a value
-            chrome.storage.local.set({
-                "autosync": value
-            });
         }
     },
 
@@ -545,7 +513,6 @@ var plansManager = {
             chrome.storage.local.clear();
             chrome.storage.sync.get(null, function (items) {
                 chrome.storage.local.set(items, function () {
-                    delete items.autosync;
                     plansManager.write.timestamp(); //set local timestamp after sync
                     callback();
                 });
@@ -557,37 +524,8 @@ var plansManager = {
             chrome.storage.sync.clear();
             plansManager.write.timestamp();
             chrome.storage.local.get(null, function (items) {
-                delete items.autosync;
                 chrome.storage.sync.set(items, callback);
             });
-        },
-        sync: function () {
-            plansManager.read.autosync(function (autosync) {
-                if (!autosync) {
-                    return
-                }
-                chrome.storage.sync.get("plansOrderTimestamp", function (syncedTimestamp) {
-                    plansManager.read.timestamp(function (localTimestamp) {
-                        if (
-                            syncedTimestamp["plansOrderTimestamp"] && //synced value exists
-                                ( (syncedTimestamp["plansOrderTimestamp"] > localTimestamp || //and it's either newer than local
-                                    !localTimestamp ) && //or there's no local
-                                    autosync  ) //and autosync is toggled on
-                            ) { // if synced is newer than local then pull and reload page
-                            plansManager.sync.pull(function () {
-                                plansManager.pushMsg("Обнаружен более новый порядок планов. " +
-                                    "Для применения необходимо обновить страницу " +
-                                    "<a href='javascript:window.location.reload()'>Обновить</a>.", "alert-info", 1);
-                                window.location.reload();
-                            });
-                        }
-                    });
-                });
-            });
-        },
-        startAutoSync: function () {
-            plansManager.sync.sync();
-            setInterval(plansManager.sync.sync, 30 * 60 * 1000);
         }
     }
 

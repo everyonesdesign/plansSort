@@ -1,6 +1,6 @@
 {
   "name": "plansSort",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "plansManager\r =========",
   "main": "ext/app.js",
   "directories": {
